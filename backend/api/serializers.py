@@ -404,17 +404,17 @@ class SubscribeDeleteSerializer(serializers.Serializer):
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
-    recipe = serializers.PrimaryKeyRelatedField(queryset=Recipe.objects.all())
+    recipe_id = serializers.IntegerField()
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
 
     class Meta:
         model = Favorite
-        fields = ('recipe', 'user')
+        fields = ('recipe_id', 'user')
         validators = [
             serializers.UniqueTogetherValidator(
                 queryset=Favorite.objects.all(),
-                fields=['user', 'recipe'],
+                fields=['user', 'recipe_id'],
                 message='Рецепт уже в избранном!'
             )
         ]
@@ -442,6 +442,7 @@ class FavoriteDeleteSerializer(serializers.Serializer):
                 {'error': 'Рецепт не существует!'},
                 code='not_found'
             )
+
     def validate(self, data):
         user = self.context['request'].user
         recipe = self.context['recipe']
@@ -455,16 +456,16 @@ class FavoriteDeleteSerializer(serializers.Serializer):
 
 
 class ShoppingCardSerializer(serializers.ModelSerializer):
-    recipe = serializers.PrimaryKeyRelatedField(queryset=Recipe.objects.all())
+    recipe_id = serializers.IntegerField()
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     class Meta:
         model = ShoppingCard
-        fields = ('recipe', 'user')
+        fields = ('recipe_id', 'user')
         validators = [
             serializers.UniqueTogetherValidator(
                 queryset=ShoppingCard.objects.all(),
-                fields=['user', 'recipe'],
+                fields=['user', 'recipe_id'],
                 message='Рецепт уже в корзине!'
             )
         ]
