@@ -1,4 +1,4 @@
-name: Taski main workflow
+name: Foodgram main workflow
 
 on:
   push:
@@ -96,3 +96,23 @@ jobs:
             sudo docker compose -f docker-compose.production.yml exec backend python manage.py migrate
             sudo docker compose -f docker-compose.production.yml exec backend python manage.py collectstatic
             sudo docker compose -f docker-compose.production.yml exec backend cp -r /app/collected_static/. /backend_static/static/
+      - name: Create superuser (if not exists)
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd foodgram
+            sudo docker compose -f docker-compose.production.yml exec backend python manage.py shell <<EOF
+            from django.contrib.auth.models import User
+            if not User.objects.filter(username='admin').exists():
+                User.objects.create_superuser(
+                    username='admin',
+                    email='berrdrin@gmail.com',
+                    password='${{ secrets.DJANGO_SUPERUSER_PASSWORD }}'
+                )
+                print("Superuser created.")
+            else:
+                print("Superuser already exists.")
+            EOF
