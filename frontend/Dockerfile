@@ -1,22 +1,22 @@
-# # build env
-# FROM node:21.7.1-alpine
-# WORKDIR /app
-# COPY package*.json ./
-# RUN npm install
-# COPY . ./
-# RUN npm run build
-# CMD cp -r build result_build
-FROM node:18
+# build env
+FROM node:21.7.1-alpine
 WORKDIR /app
-
-COPY package.json package.json
-COPY package-lock.json package-lock.json
-
+COPY package*.json ./
 RUN npm install
-
-COPY . .
+COPY . ./
 RUN npm run build
+CMD cp -r build result_build
+# FROM node:18
+# WORKDIR /app
 
-# Эта команда запустит встроенный сервер на Node.js, который будет раздавать
-# содержимое директории /app/build на порте 8000
-CMD ["npx", "-y", "http-server", "-p", "8000", "/app/build"] 
+# COPY package.json package.json
+# COPY package-lock.json package-lock.json
+
+# RUN npm install
+
+# COPY . .
+# RUN npm run build
+
+# # Эта команда запустит встроенный сервер на Node.js, который будет раздавать
+# # содержимое директории /app/build на порте 8000
+# CMD ["npx", "-y", "http-server", "-p", "8000", "/app/build"] 
