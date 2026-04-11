@@ -7,7 +7,11 @@ SECRET_KEY = 'django-insecure-@&3s300i-z-wi7q9*n^-6x4@ygo!t+8i*m2@9*x$zd&nxb22%u
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '158.160.209.12', 'foodgram.serveblog.net']
+ALLOWED_HOSTS = ['foodgram.serveblog.net', '158.160.209.12', 'localhost', '127.0.0.1']
+
+CSRF_TRUSTED_ORIGINS = ['https://foodgram.serveblog.net', 'http://foodgram.serveblog.net']
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 AUTH_USER_MODEL = 'users.MyUser'
 
