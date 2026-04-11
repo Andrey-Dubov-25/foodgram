@@ -1,7 +1,7 @@
 from django.db import models
 
-from core.utils import User, get_short_url
 from core import constants
+from core.utils import User
 
 
 class Tag(models.Model):

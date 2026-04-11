@@ -31,7 +31,7 @@ class MyUser(AbstractUser):
     )
     avatar = models.ImageField(null=True, blank=True)
     password = models.CharField(
-        max_length=256,
+        max_length=constants.PASSWORD_LEN,
         verbose_name='Пароль',
         help_text='Пароль пользователя'
     )

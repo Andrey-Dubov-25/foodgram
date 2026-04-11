@@ -1,19 +1,18 @@
 from django.contrib import admin
 
 from .models import (
-    Recipe,
-    Tag,
+    Favorite,
     Ingredient,
     IngredientRecipe,
+    Recipe,
+    ShoppingCard,
     Subscribe,
-    Favorite,
-    ShoppingCard
+    Tag,
 )
 
 
 class IngredientRecipeInLine(admin.TabularInline):
     model = IngredientRecipe
-
 
 
 @admin.register(Ingredient)
@@ -26,11 +25,9 @@ class IngredientAdmin(admin.ModelAdmin):
 class ReceipAdmin(admin.ModelAdmin):
     inlines = (IngredientRecipeInLine,)
     list_display = ('name',)
-    # list_editable = ('name',)
     search_fields = ('name',)
     list_filter = ('tags',)
     list_display_links = ('name',)
-    # filter_horizontal = ('tags', 'ingredients')
 
 
 @admin.register(Subscribe)

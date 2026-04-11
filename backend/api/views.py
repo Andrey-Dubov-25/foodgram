@@ -1,41 +1,41 @@
-from io import BytesIO
 from collections import defaultdict
+from io import BytesIO
+
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework import viewsets, status, filters, permissions
-from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
-from django.urls import reverse
 from rest_framework.pagination import LimitOffsetPagination
-from .filters import RecipeFilter
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
+from django_filters.rest_framework import DjangoFilterBackend
 
 from core import utils
-from .serializers import (
-    UserSerializer,
-    UserRegistrationSerializer,
-    ChangePasswordSerializer,
-    AvatarSerializer,
-    RecipeSerializer,
-    TagSerializer,
-    IngredientSerializer,
-    SubscribeSerializer,
-    FavoriteSerializer,
-    ShoppingCardSerializer,
-    ShoppingCardDeleteSerializer,
-    FavoriteDeleteSerializer,
-    SubscribeDeleteSerializer
-)
 from recipe.models import (
-    Recipe,
-    Tag,
-    Ingredient,
-    Subscribe,
     Favorite,
-    ShoppingCard
+    Ingredient,
+    Recipe,
+    ShoppingCard,
+    Subscribe,
+    Tag,
 )
+from .filters import RecipeFilter
 from .permissions import AuthorOrReadOnly
+from .serializers import (
+    AvatarSerializer,
+    ChangePasswordSerializer,
+    FavoriteDeleteSerializer,
+    FavoriteSerializer,
+    IngredientSerializer,
+    RecipeSerializer,
+    ShoppingCardDeleteSerializer,
+    ShoppingCardSerializer,
+    SubscribeDeleteSerializer,
+    SubscribeSerializer,
+    TagSerializer,
+    UserRegistrationSerializer,
+    UserSerializer,
+)
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -187,7 +187,6 @@ class RecipeList(viewsets.ModelViewSet):
     pagination_class = LimitOffsetPagination
     filter_backends = (filters.OrderingFilter, DjangoFilterBackend)
     filterset_class = RecipeFilter
-    filterset_fields = ('author',)
     ordering = ('-pub_date',)
     http_method_names = ('get', 'post', 'patch', 'delete')
 
@@ -207,7 +206,7 @@ class RecipeList(viewsets.ModelViewSet):
 
         if is_in_card is None and is_in_favorite is None:
             return queryset
-        
+
         if is_in_card == str(1):
             cart_recipe = ShoppingCard.objects.filter(
                 user=user
@@ -301,7 +300,9 @@ class RecipeList(viewsets.ModelViewSet):
             )
 
         if request.method == 'DELETE':
-            serializer = ShoppingCardDeleteSerializer(data=data, context=context)
+            serializer = ShoppingCardDeleteSerializer(
+                data=data, context=context
+            )
 
             if serializer.is_valid():
                 recipe = serializer.context['recipe']
@@ -353,14 +354,14 @@ class RecipeList(viewsets.ModelViewSet):
                 ingredient = ingredient_recipe.ingredient
                 key = (ingredient.name, ingredient.measurement_unit)
                 ingredients[key] += ingredient_recipe.amount
-        
+
         text_to_print = 'список покупок:\n\n'
 
         sorted_items = sorted(ingredients.items(), key=lambda x: x[0][0])
 
         for (name, unit), total in sorted_items:
             text_to_print += f'{name}: {total} {unit}\n'
-        
+
         data = [
             {'name': name, 'total': total, 'unit': unit}
             for (name, unit), total in ingredients.items()

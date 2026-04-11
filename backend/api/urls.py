@@ -1,20 +1,19 @@
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from django.urls import include, path
-
 from .views import (
-    UserViewSet,
+    IngredientReadOnlyModelViewSet,
     RecipeList,
     TagReadOnlyModelViewSet,
-    IngredientReadOnlyModelViewSet,
+    UserViewSet,
 )
+
 
 router = DefaultRouter()
 router.register('users', UserViewSet)
 router.register('recipes', RecipeList)
 router.register('tags', TagReadOnlyModelViewSet)
 router.register('ingredients', IngredientReadOnlyModelViewSet)
-
 
 
 urlpatterns = [
