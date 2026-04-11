@@ -24,4 +24,4 @@ jobs:
         with:
           context: ./backend/
           push: true
-          tags: 25andrey25/foodgram_backend:latest 
+          tags: 25andrey25/foodgram_backend:latest
