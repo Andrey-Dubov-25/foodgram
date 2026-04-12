@@ -360,7 +360,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         if tags is not None:
             instance.tags.set(tags)
 
-        instance.save
+        instance.save()
         return instance
 
 
