@@ -195,7 +195,7 @@ class RecipeList(viewsets.ModelViewSet):
         Получение списка рецептов в завизимости от наличия в списке покупок или
         в избранном.
         """
-        queryset = super().get_queryset()
+        queryset = super().get_queryset().distinct()
         user = utils.get_self_user(self)
         is_in_card = self.request.query_params.get('is_in_shopping_cart')
         is_in_favorite = self.request.query_params.get('is_favorited')

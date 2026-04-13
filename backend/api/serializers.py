@@ -260,7 +260,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         if 'image' not in data:
             raise serializers.ValidationError(
                 'Необходимо добавить image.'
-                )
+            )
         if 'tags' not in data:
             raise serializers.ValidationError('Необходимо добавить tags.')
         if 'ingredients' not in data:
