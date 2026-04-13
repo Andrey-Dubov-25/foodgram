@@ -23,6 +23,7 @@ from .validators import (
 
 class UserSerializer(UsernameValidatorMixin, serializers.ModelSerializer):
     """Сериализация данных пользователя."""
+
     avatar = Base64ImageField(required=False, allow_null=True)
     is_subscribed = serializers.SerializerMethodField()
 
@@ -54,6 +55,7 @@ class UserRegistrationSerializer(
     UsernameValidatorMixin, serializers.ModelSerializer
 ):
     """Сериализация данных при регистрации пользователя."""
+
     email = serializers.EmailField(max_length=constants.EMAIL_LEN)
     username = serializers.CharField(max_length=constants.USERNAME_LEN)
     first_name = serializers.CharField(max_length=constants.FIRST_NAME_LEN)
@@ -107,6 +109,7 @@ class UserRegistrationSerializer(
 
 class GetTokenSerializer(serializers.Serializer):
     """Сериализация данных при получении токена."""
+
     email = serializers.EmailField(max_length=constants.EMAIL_LEN)
     password = serializers.CharField(max_length=constants.PASSWORD_LEN)
 
@@ -125,6 +128,7 @@ class GetTokenSerializer(serializers.Serializer):
 
 class ChangePasswordSerializer(serializers.Serializer):
     """Сериализация данных при смене пароля."""
+
     new_password = serializers.CharField(max_length=constants.PASSWORD_LEN)
     current_password = serializers.CharField(max_length=constants.PASSWORD_LEN)
 
@@ -141,11 +145,11 @@ class ChangePasswordSerializer(serializers.Serializer):
 
 class AvatarSerializer(serializers.ModelSerializer):
     """Сериализация при обработке поля avatar."""
+
     avatar = Base64ImageField()
 
     def validate(self, data):
         """Валидация на наличие поля avatar."""
-
         if 'avatar' not in data:
             raise serializers.ValidationError(
                 'Поле avatar обязательно для загрузки.'
@@ -183,6 +187,7 @@ class TagSerializer(serializers.ModelSerializer):
 
 class RecipeSerializer(serializers.ModelSerializer):
     """Сериализация рецептов."""
+
     image = Base64ImageField()
     ingredients = IngredientRecipeSerializer(write_only=True, many=True)
     tags = serializers.PrimaryKeyRelatedField(
@@ -211,7 +216,6 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def validate_ingredients(self, value):
         """Валидация на наличие ингредиентов."""
-
         if not value:
             raise serializers.ValidationError(
                 'Поле ингредиентов не может быть пустым!'
@@ -221,7 +225,6 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def validate_tags(self, value):
         """Валидация на наличие тегов и их повторение."""
-
         if not value:
             raise serializers.ValidationError(
                 'Поле тегов не может быть пустым.'
@@ -236,7 +239,6 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def validate_image(self, value):
         """Валидация на наличие изображения."""
-
         if not value:
             raise serializers.ValidationError(
                 'Нельзя оставлять поле изображения пустым!'
@@ -246,7 +248,6 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def validate_cooking_time(self, value):
         """Валидация времени приготовления."""
-
         if value < 1:
             raise serializers.ValidationError(
                 'Время приготовления не должно быть меньше 1!'
@@ -256,7 +257,6 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         """Валидация на наличие полей image, tags и ingredients."""
-
         if 'image' not in data:
             raise serializers.ValidationError(
                 'Необходимо добавить image.'
@@ -287,7 +287,6 @@ class RecipeSerializer(serializers.ModelSerializer):
             )
 
         return data
-
 
     def get_is_favorited(self, obj):
         """Возвращает булевое значение о наличии рецепта в избранном."""
@@ -396,6 +395,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 
 class SubscribeSerializer(serializers.ModelSerializer):
     """Сериализатор для подписок."""
+
     subscribing = serializers.PrimaryKeyRelatedField(
         queryset=User.objects.all()
     )
@@ -472,11 +472,11 @@ class SubscribeSerializer(serializers.ModelSerializer):
 
 class SubscribeDeleteSerializer(serializers.Serializer):
     """Сериализатор для удаления подписки."""
+
     subscribing_id = serializers.IntegerField()
 
     def validate_subscribing_id(self, value):
         """Валидация на существование пользователя для подписки."""
-
         try:
             subscribing = utils.User.objects.get(pk=value)
             self.context['subscribing'] = subscribing
@@ -507,6 +507,7 @@ class SubscribeDeleteSerializer(serializers.Serializer):
 class FavoriteSerializer(
     RecipeRepresentationMixin, serializers.ModelSerializer
 ):
+
     """Сериализатор для списка избранного."""
     recipe_id = serializers.IntegerField()
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
@@ -527,10 +528,12 @@ class FavoriteDeleteSerializer(
     RecipeDeleteFromMixin, serializers.Serializer
 ):
     """Сериализатор для удаления из корзины покупок."""
+
     recipe_id = serializers.IntegerField()
     relation_model = Favorite
 
     def get_error_message(self):
+        """Возвращает сообщение об ошибке."""
         return 'Рецепт не найден в избранном.'
 
 
@@ -538,6 +541,7 @@ class ShoppingCardSerializer(
     RecipeRepresentationMixin, serializers.ModelSerializer
 ):
     """Сериализатор для списка списка покупок."""
+
     recipe_id = serializers.IntegerField()
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
@@ -557,8 +561,10 @@ class ShoppingCardDeleteSerializer(
     RecipeDeleteFromMixin, serializers.Serializer
 ):
     """Сериализатор для удаления из корзины покупок."""
+
     recipe_id = serializers.IntegerField()
     relation_model = ShoppingCard
 
     def get_error_message(self):
+        """Возвращает сообщение об ошибке."""
         return 'Рецепт не найден в списке покупок.'
