@@ -214,18 +214,28 @@ class RecipeList(viewsets.ModelViewSet):
             queryset = queryset.filter(id__in=cart_recipe)
 
         elif is_in_favorite == str(1):
-            favorite_recipe = ShoppingCard.objects.filter(
+            favorite_recipe = Favorite.objects.filter(
                 user=user
             ).values_list('recipe_id', flat=True)
             queryset = queryset.filter(id__in=favorite_recipe)
 
         return queryset
 
+
     def get_permissions(self):
         """Доступ на редактирование только автору рецепта."""
         if self.action in ['list', 'retrieve']:
             return (AllowAny(),)
-        return (AuthorOrReadOnly(),)
+        elif self.action == 'create':
+            return (IsAuthenticated(),)
+        else:
+            return (AuthorOrReadOnly(),) 
+
+    # def get_permissions(self):
+    #     """Доступ на редактирование только автору рецепта."""
+    #     if self.action in ['list', 'retrieve']:
+    #         return (AllowAny(),)
+    #     return (AuthorOrReadOnly(),)
 
     def perform_create(self, serializer):
         """Присваивание автора рецепта текущего пользователя"""
