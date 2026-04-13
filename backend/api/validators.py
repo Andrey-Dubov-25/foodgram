@@ -10,7 +10,6 @@ class UsernameValidatorMixin:
 
     def validate_username(self, value):
         """Валидация поля username на допустимые символы."""
-
         if not re.match(r'^[\w.@+-]+\Z$', value):
             raise serializers.ValidationError(
                 'Недопустимый username. Доступно только буквы, цифры и '
@@ -41,7 +40,6 @@ class RecipeDeleteFromMixin:
 
     def validate_recipe_id(self, value):
         """Проверка на существования рецепта. Если не найден - ошибка 404."""
-
         try:
             recipe = Recipe.objects.get(pk=value)
             self.context['recipe'] = recipe
@@ -72,4 +70,5 @@ class RecipeDeleteFromMixin:
         return data
     
     def get_error_message(self):
+        """Возвращает текст ошибки."""
         return 'Ошибка поиска.'
