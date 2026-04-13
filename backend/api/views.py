@@ -202,13 +202,10 @@ class RecipeList(viewsets.ModelViewSet):
 
         if not user.is_authenticated:
             if is_in_card == '1' or is_in_favorite == '1':
-                return queryset.distinct()
+                return queryset
 
         if is_in_card is None and is_in_favorite is None:
-            return queryset.prefetch_related(
-                'tags',
-                'ingredientrecipe_set__ingredient'
-            )
+            return queryset
 
         if is_in_card == str(1):
             cart_recipe = ShoppingCard.objects.filter(
@@ -222,7 +219,7 @@ class RecipeList(viewsets.ModelViewSet):
             ).values_list('recipe_id', flat=True)
             queryset = queryset.filter(id__in=favorite_recipe)
 
-        return queryset.distinct()
+        return queryset
 
 
     def get_permissions(self):

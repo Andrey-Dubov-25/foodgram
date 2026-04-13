@@ -15,7 +15,10 @@ class RecipeFilter(filters.FilterSet):
     def filter_tags(self, queryset, name, value):
         tags = self.request.GET.getlist('tags')
 
-        if not value:
+        if not tags:
             return queryset
+        
+        for tag in tags:
+            queryset = queryset.filter(tags__slug=tag)
 
-        return queryset.filter(tags__slug__in=tags)
+        return queryset.distinct()
