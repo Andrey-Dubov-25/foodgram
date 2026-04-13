@@ -60,7 +60,10 @@ class Recipe(models.Model):
         verbose_name='Описание',
         help_text='Описание рецепта'
     )
-    image = models.ImageField(null=True, blank=True)
+    image = models.ImageField(
+        verbose_name='Изображение',
+        help_text='Изображение готового блюда'
+    )
     cooking_time = models.IntegerField(
         verbose_name='Время приготовления',
         help_text='Время приготовления рецепта'
@@ -76,7 +79,11 @@ class Recipe(models.Model):
         verbose_name='Ингредиент(ы)',
         help_text='Название ингредиента(ов)'
     )
-    pub_date = models.DateTimeField(auto_now_add=True)
+    pub_date = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Дата публикации',
+        help_text='Дата публикации рецепта'
+    )
 
     class Meta:
         verbose_name = 'рецепт'

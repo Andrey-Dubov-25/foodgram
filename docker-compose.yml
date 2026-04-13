@@ -1,33 +1,74 @@
-# docker-compose.yml
-version: '3'
-
 volumes:
-  pg_data:
-  static:
+  pg_data_production:
+  static_volume:
+  media_volume:
 
 services:
   db:
     image: postgres:13
     env_file: .env
     volumes:
-      - pg_data:/var/lib/postgresql/data
+      - pg_data_production:/var/lib/postgresql/data
+
   backend:
-    build: ./backend/
+    image: 25andrey25/foodgram_backend
     env_file: .env
+    depends_on:
+      - db
     volumes:
-      - static:/backend_static
+      - static_volume:/backend_static
+      - media_volume:/app/media
 
   frontend:
-    env_file: .env
-    build: ./frontend/
+    image: 25andrey25/foodgram_frontend
     command: cp -r /app/build/. /frontend_static/
     volumes:
-      - static:/frontend_static
+      - static_volume:/frontend_static
+    depends_on:
+      - backend
 
   gateway:
-    build: ./gateway/
+    image: 25andrey25/foodgram_gateway
     env_file: .env
     volumes:
-      - static:/staticfiles
+      - static_volume:/staticfiles
+      - media_volume:/app/media
     ports:
-      - 8000:80 
+      - 8000:80
+    depends_on:
+      - backend
+      - frontend
+
+# # docker-compose.yml
+# version: '3'
+
+# volumes:
+#   pg_data:
+#   static:
+
+# services:
+#   db:
+#     image: postgres:13
+#     env_file: .env
+#     volumes:
+#       - pg_data:/var/lib/postgresql/data
+#   backend:
+#     build: ./backend/
+#     env_file: .env
+#     volumes:
+#       - static:/backend_static
+
+#   frontend:
+#     env_file: .env
+#     build: ./frontend/
+#     command: cp -r /app/build/. /frontend_static/
+#     volumes:
+#       - static:/frontend_static
+
+#   gateway:
+#     build: ./gateway/
+#     env_file: .env
+#     volumes:
+#       - static:/staticfiles
+#     ports:
+#       - 8000:80 

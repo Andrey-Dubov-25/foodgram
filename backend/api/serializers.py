@@ -183,7 +183,7 @@ class TagSerializer(serializers.ModelSerializer):
 
 class RecipeSerializer(serializers.ModelSerializer):
     """Сериализация рецептов."""
-    image = Base64ImageField(required=False, allow_null=True)
+    image = Base64ImageField()
     ingredients = IngredientRecipeSerializer(write_only=True, many=True)
     tags = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(),
