@@ -231,12 +231,6 @@ class RecipeList(viewsets.ModelViewSet):
         else:
             return (AuthorOrReadOnly(),) 
 
-    # def get_permissions(self):
-    #     """Доступ на редактирование только автору рецепта."""
-    #     if self.action in ['list', 'retrieve']:
-    #         return (AllowAny(),)
-    #     return (AuthorOrReadOnly(),)
-
     def perform_create(self, serializer):
         """Присваивание автора рецепта текущего пользователя"""
         serializer.save(author=utils.get_self_user(self))

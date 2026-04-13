@@ -365,28 +365,21 @@ class RecipeSerializer(serializers.ModelSerializer):
 
         if tags is not None:
             instance.tags.set(tags)
-        # ingredients = validated_data.get('ingredients')
+        ingredients = validated_data.get('ingredients')
 
-        # if ingredients is not None:
-        #     # Удаляем старые связи
-        #     IngredientRecipe.objects.filter(recipe=instance).delete()
+        if ingredients is not None:
+            # Удаляем старые связи
+            IngredientRecipe.objects.filter(recipe=instance).delete()
 
-        #     # Создаём новые связи с обработкой ошибок
-        #     for ingredient_data in ingredients:
-        #         ingredient_id = ingredient_data['id']
-        #         amount = ingredient_data['amount']
-
-        #         try:
-        #             ingredient = Ingredient.objects.get(id=ingredient_id)
-        #             IngredientRecipe.objects.create(
-        #                 ingredient=ingredient,
-        #                 recipe=instance,
-        #                 amount=amount
-        #             )
-        #         except Ingredient.DoesNotExist:
-        #             raise serializers.ValidationError(
-        #                 f'Ингредиент с ID {ingredient_id} не существует.'
-        #             )
+            for ingredient in ingredients:
+                ingredient_id = ingredient['id']
+                amount = ingredient['amount']
+                ingredient = Ingredient.objects.get(id=ingredient_id)
+                IngredientRecipe.objects.create(
+                    ingredient=ingredient,
+                    recipe=instance,
+                    amount=amount
+                )
 
         instance.save()
         return instance
