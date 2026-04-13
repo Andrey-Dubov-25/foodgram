@@ -195,6 +195,7 @@ class RecipeList(viewsets.ModelViewSet):
         Получение списка рецептов в завизимости от наличия в списке покупок или
         в избранном.
         """
+
         queryset = super().get_queryset().prefetch_related(
             'tags',
             'ingredientrecipe_set__ingredient'
