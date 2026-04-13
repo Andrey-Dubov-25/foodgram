@@ -195,21 +195,20 @@ class RecipeList(viewsets.ModelViewSet):
         Получение списка рецептов в завизимости от наличия в списке покупок или
         в избранном.
         """
-
-        queryset = super().get_queryset().prefetch_related(
-            'tags',
-            'ingredientrecipe_set__ingredient'
-        )
+        queryset = super().get_queryset()
         user = utils.get_self_user(self)
         is_in_card = self.request.query_params.get('is_in_shopping_cart')
         is_in_favorite = self.request.query_params.get('is_favorited')
 
         if not user.is_authenticated:
             if is_in_card == '1' or is_in_favorite == '1':
-                return queryset
+                return queryset.distinct()
 
         if is_in_card is None and is_in_favorite is None:
-            return queryset
+            return queryset.prefetch_related(
+                'tags',
+                'ingredientrecipe_set__ingredient'
+            )
 
         if is_in_card == str(1):
             cart_recipe = ShoppingCard.objects.filter(
