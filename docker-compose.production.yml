@@ -1,40 +1,40 @@
 volumes:
-  pg_data:
-  static:
-  media:
+  pg_data_production:
+  static_volume:
+  media_volume:
 
 services:
   db:
     image: postgres:13
     env_file: .env
     volumes:
-      - pg_data_production:/var/lib/postgresql/data
+      - pg_data:/var/lib/postgresql/data
+
   backend:
     image: 25andrey25/foodgram_backend
     env_file: .env
     depends_on:
       - db
     volumes:
-      - static:/static
-      - media:/app/media
+      - static_volume:/backend_static
+      - media_volume:/app/media
+
   frontend:
     image: 25andrey25/foodgram_frontend
-    env_file: .env
+    command: cp -r /app/build/. /frontend_static/
+    volumes:
+      - static_volume:/frontend_static
     depends_on:
       - backend
-    volumes:
-      - ../frontend/:/app/result_build/
+
   gateway:
     image: 25andrey25/foodgram_gateway
     env_file: .env
-    depends_on:
-      - backend
-      - frontend
     volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf
-      - ../frontend/build:/usr/share/nginx/html/
-      - ../docs/:/usr/share/nginx/html/api/docs/
-      - static_volume:/staticfiles/
+      - static_volume:/staticfiles
       - media_volume:/app/media
     ports:
       - 8000:80
+    depends_on:
+      - backend
+      - frontend
