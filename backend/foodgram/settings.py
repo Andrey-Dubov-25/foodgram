@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     'api.apps.ApiConfig',
     'debug_toolbar',
     'django_filters',
+    'drf_extra_fields',
 ]
 
 MIDDLEWARE = [

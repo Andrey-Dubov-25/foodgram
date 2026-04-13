@@ -8,5 +8,3 @@ pillow==12.2.0
 django-filter==24.3
 django-cors-headers==4.6.0
 psycopg2-binary==2.9.11 
-# Запускал бэк и фронт в разработке
-# django-cors-headers==4.5.0 
