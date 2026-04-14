@@ -5,6 +5,8 @@ from core.utils import User
 
 
 class Tag(models.Model):
+    """Модель тегов."""
+
     name = models.CharField(
         max_length=constants.NAME_TAG_LEN,
         verbose_name='Название',
@@ -22,10 +24,13 @@ class Tag(models.Model):
         verbose_name_plural = 'Теги'
 
     def __str__(self):
+        """Возвращает строковое представление."""
         return self.name
 
 
 class Ingredient(models.Model):
+    """Модель ингредиентов."""
+
     name = models.CharField(
         max_length=constants.NAME_INGREDIENT_LEN,
         verbose_name='Название',
@@ -42,10 +47,13 @@ class Ingredient(models.Model):
         verbose_name_plural = 'Ингредиенты'
 
     def __str__(self):
+        """Возвращает строковое представление."""
         return self.name
 
 
 class Recipe(models.Model):
+    """Модель рецептов."""
+
     author = models.ForeignKey(
         User,
         related_name='recipes',
@@ -90,21 +98,26 @@ class Recipe(models.Model):
         verbose_name_plural = 'Рецепты'
 
     def __str__(self):
+        """Возвращает строковое представление."""
         return self.name
 
 
 class IngredientRecipe(models.Model):
+    """Промежуточная модель для связи ингредиентов и рецептов."""
+
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
         verbose_name='Ингредиент',
-        help_text='Ингредиенты для рецепта'
+        help_text='Ингредиенты для рецепта',
+        related_name='ingredient_recipes'
     )
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
         verbose_name='Рецепт',
-        help_text='Ингредиенты для рецепта'
+        help_text='Ингредиенты для рецепта',
+        related_name='recipe_ingredients'
     )
     amount = models.IntegerField(
         verbose_name='Количество',
@@ -116,10 +129,13 @@ class IngredientRecipe(models.Model):
         verbose_name_plural = 'Ингредиенты для рецептов'
 
     def __str__(self):
+        """Возвращает строковое представление."""
         return f'{self.ingredient} для {self.recipe}'
 
 
 class Subscribe(models.Model):
+    """Модель подписок на пользователя."""
+
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -130,7 +146,7 @@ class Subscribe(models.Model):
     subscribing = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='subscribing',
+        related_name='subscribed_by',
         verbose_name='Подписка',
         help_text='Пользователь, на которого оформлена подписка'
     )
@@ -146,10 +162,13 @@ class Subscribe(models.Model):
         ]
 
     def __str__(self):
+        """Возвращает строковое представление."""
         return f'{self.user} подписался на {self.subscribing}'
 
 
 class Favorite(models.Model):
+    """Модель списка избранных рецептов."""
+
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -160,7 +179,7 @@ class Favorite(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='favorit',
+        related_name='favorites_by',
         verbose_name='Рецепт',
         help_text='Рецепт в избранном для пользователя'
     )
@@ -176,22 +195,24 @@ class Favorite(models.Model):
         ]
 
     def __str__(self):
+        """Возвращает строковое представление."""
         return f'{self.user} добавил в избранное {self.recipe}'
 
 
 class ShoppingCard(models.Model):
+    """Модель списка покупок пользователя."""
+
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='cards',
+        related_name='shopping_cards',
         verbose_name='Пользователь',
         help_text='Пользователь, который добавил рецепт в список покупок'
-
     )
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='card',
+        related_name='in_shopping_card',
         verbose_name='Рецепт',
         help_text='Рецепт, который пользователь добавил в список покупок'
     )
@@ -207,4 +228,5 @@ class ShoppingCard(models.Model):
         ]
 
     def __str__(self):
+        """Возвращает строковое представление."""
         return f'{self.user} добавил в список покупок {self.recipe}'

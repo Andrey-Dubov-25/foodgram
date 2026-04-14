@@ -5,6 +5,8 @@ from core import constants
 
 
 class MyUser(AbstractUser):
+    """Кастомная модель пользователя."""
+
     first_name = models.CharField(
         max_length=constants.FIRST_NAME_LEN,
         blank=True,
@@ -41,4 +43,5 @@ class MyUser(AbstractUser):
         verbose_name_plural = 'Пользователи'
 
     def __str__(self):
+        """Возвращает строковое представление."""
         return self.username

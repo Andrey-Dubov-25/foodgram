@@ -2,6 +2,7 @@ import re
 
 from rest_framework import serializers
 
+from core import utils
 from recipe.models import Recipe
 
 
@@ -52,11 +53,8 @@ class RecipeDeleteFromMixin:
             )
 
     def validate(self, data):
-        """
-        Проверка на существование рецепта в корзине — если не найден - ошибка
-        400.
-        """
-        user = self.context['request'].user
+        """Проверка на существование рецепта в корзине — или ошибка 400."""
+        user = utils.get_context_request(self).user
         recipe = self.context['recipe']
 
         if not self.relation_model.objects.filter(
@@ -68,7 +66,7 @@ class RecipeDeleteFromMixin:
             )
 
         return data
-    
+
     def get_error_message(self):
         """Возвращает текст ошибки."""
         return 'Ошибка поиска.'

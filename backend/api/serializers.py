@@ -303,7 +303,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 
         if not request or not request.user.is_authenticated:
             return False
-        
+
         return ShoppingCard.objects.filter(
             user=request.user, recipe=obj
         ).exists()
@@ -311,7 +311,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         """Возвращает расширенное представление для рецептов."""
         data = super().to_representation(instance)
-        ingredients = instance.ingredientrecipe_set.all()
+        ingredients = instance.recipe_ingredients.all()
         data['ingredients'] = []
 
         for ingredient in ingredients:

@@ -17,8 +17,10 @@ class RecipeFilter(filters.FilterSet):
 
         if not tags:
             return queryset
-        
-        for tag in tags:
-            queryset = queryset.filter(tags__slug=tag)
 
-        return queryset.distinct()
+        return queryset.filter(tags__slug__in=tags).distinct()
+
+        # for tag in tags:
+        #     queryset = queryset.filter(tags__slug=tag)
+
+        # return queryset.distinct()
