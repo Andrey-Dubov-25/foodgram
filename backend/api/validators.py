@@ -33,6 +33,7 @@ class RecipeRepresentationMixin:
             ),
             'cooking_time': instance.recipe.cooking_time
         }
+
         return recipe
 
 
