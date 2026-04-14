@@ -3,7 +3,6 @@ from rest_framework import serializers
 from drf_extra_fields.fields import Base64ImageField
 
 from core import constants, utils
-from core.utils import User
 from recipe.models import (
     Favorite,
     Ingredient,
@@ -99,9 +98,9 @@ class UserRegistrationSerializer(
     def create(self, validated_data):
         """Регистрация пользователя."""
         user = utils.User.objects.create_user(
-            username=validated_data['username'],
-            email=validated_data['email'],
-            password=validated_data['password'],
+            username=validated_data.get('username'),
+            email=validated_data.get('email'),
+            password=validated_data.get('password'),
             first_name=validated_data.get('first_name', ''),
             last_name=validated_data.get('last_name', '')
         )
@@ -341,20 +340,13 @@ class RecipeSerializer(serializers.ModelSerializer):
             IngredientRecipe.objects.create(
                 ingredient=ingredient, recipe=recipe, amount=amount
             )
-        # all_ingredients = []
-        # for ingredient in ingredients:
-        #     all_ingredients.append(IngredientRecipe(
-        #         recipe=recipe,
-        #         ingredient=ingredient['id'],
-        #         amount=ingredient['amount']
-        #     ))
-        # IngredientRecipe.objects.bulk_create(all_ingredients)
+
         recipe.tags.set(tags)
 
         return recipe
 
     def update(self, instance, validated_data):
-        """Обновляет рецепт с возможность изменения тегов."""
+        """Обновляет рецепт с возможность изменения тегов и ингредиентов."""
         instance.name = validated_data.get('name', instance.name)
         instance.text = validated_data.get('text', instance.text)
         instance.cooking_time = validated_data.get(
@@ -368,11 +360,10 @@ class RecipeSerializer(serializers.ModelSerializer):
         ingredients = validated_data.get('ingredients')
 
         if ingredients is not None:
-            # Удаляем старые связи
             IngredientRecipe.objects.filter(recipe=instance).delete()
 
             for ingredient in ingredients:
-                ingredient_id = ingredient['id']
+                ingredient_id = ingredient.get('id')
                 amount = ingredient['amount']
                 ingredient = Ingredient.objects.get(id=ingredient_id)
                 IngredientRecipe.objects.create(
@@ -389,7 +380,7 @@ class SubscribeSerializer(serializers.ModelSerializer):
     """Сериализатор для подписок."""
 
     subscribing = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all()
+        queryset=utils.User.objects.all()
     )
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
@@ -474,7 +465,7 @@ class SubscribeDeleteSerializer(serializers.Serializer):
             self.context['subscribing'] = subscribing
             return value
 
-        except User.DoesNotExist:
+        except utils.User.DoesNotExist:
             raise serializers.ValidationError(
                 {'error': 'Такого юзера не существует!'},
                 code='not_found'

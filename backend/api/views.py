@@ -382,24 +382,14 @@ class RecipeList(viewsets.ModelViewSet):
                 key = (ingredient.name, ingredient.measurement_unit)
                 ingredients[key] += ingredient_in_recipe.amount
 
-        text_to_print = 'список покупок:\n\n'
-
-        sorted_items = sorted(ingredients.items(), key=lambda x: x[0][0])
-
-        for (name, unit), total in sorted_items:
-            text_to_print += f'{name}: {total} {unit}\n'
-
-        data = [
-            {'name': name, 'total': total, 'unit': unit}
-            for (name, unit), total in ingredients.items()
-        ]
-
-        file_data = self.ingredients_to_text(data)
+        file_data = self.ingredients_to_text(ingredients.items())
 
         response = HttpResponse(
             file_data, content_type='text/plain; charset=utf-8'
         )
-
+        response[
+            'Content-Disposition'
+        ] = 'attachment; filename="shopping_list.txt"'
         return response
 
     @staticmethod
