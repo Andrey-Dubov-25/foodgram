@@ -1,7 +1,7 @@
 from rest_framework import permissions
 
 
-class AuthorOrReadOnly(permissions.BasePermission):
+class IsAuthorOrReadOnly(permissions.BasePermission):
     """Доступ к редактированию только автору или для чтения."""
 
     def has_permission(self, request, view):

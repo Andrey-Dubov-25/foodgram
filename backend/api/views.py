@@ -5,9 +5,10 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import (
-    AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
+    AllowAny,
+    IsAuthenticated,
+    IsAuthenticatedOrReadOnly,
 )
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
@@ -23,7 +24,7 @@ from recipe.models import (
 )
 from .filters import RecipeFilter
 from .paginations import LimitPagination
-from .permissions import AuthorOrReadOnly
+from .permissions import IsAuthorOrReadOnly
 from .serializers import (
     AvatarSerializer,
     ChangePasswordSerializer,
@@ -193,7 +194,7 @@ class RecipeList(viewsets.ModelViewSet):
 
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
-    permission_classes = (AuthorOrReadOnly,)
+    permission_classes = (IsAuthorOrReadOnly,)
     pagination_class = LimitPagination
     filter_backends = (filters.OrderingFilter, DjangoFilterBackend)
     filterset_class = RecipeFilter
@@ -245,7 +246,7 @@ class RecipeList(viewsets.ModelViewSet):
             return (IsAuthenticated(),)
 
         else:
-            return (AuthorOrReadOnly(),)
+            return (IsAuthorOrReadOnly(),)
 
     def perform_create(self, serializer):
         """Присваивание автора рецепта текущего пользователя."""
