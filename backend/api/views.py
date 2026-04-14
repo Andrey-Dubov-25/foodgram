@@ -382,14 +382,17 @@ class RecipeList(viewsets.ModelViewSet):
                 key = (ingredient.name, ingredient.measurement_unit)
                 ingredients[key] += ingredient_in_recipe.amount
 
-        file_data = self.ingredients_to_text(ingredients.items())
+        data = [
+            {'name': name, 'total': total, 'unit': unit}
+            for (name, unit), total in ingredients.items()
+        ]
+
+        file_data = self.ingredients_to_text(data)
 
         response = HttpResponse(
             file_data, content_type='text/plain; charset=utf-8'
         )
-        response[
-            'Content-Disposition'
-        ] = 'attachment; filename="shopping_list.txt"'
+
         return response
 
     @staticmethod
