@@ -2,7 +2,6 @@ from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from drf_extra_fields.fields import Base64ImageField
 
-
 from core import constants, utils
 from core.utils import User
 from recipe.models import (
@@ -81,7 +80,9 @@ class UserRegistrationSerializer(
         """
         username = utils.get_username(data)
         email = utils.get_email(data)
-        username_for_user = utils.User.objects.filter(username=username).first()
+        username_for_user = utils.User.objects.filter(
+            username=username
+        ).first()
         email_for_user = utils.User.objects.filter(email=email).first()
 
         if username_for_user:
@@ -160,7 +161,6 @@ class AvatarSerializer(serializers.ModelSerializer):
     class Meta:
         model = utils.User
         fields = ('avatar',)
-
 
 
 class IngredientSerializer(serializers.ModelSerializer):
@@ -383,7 +383,6 @@ class RecipeSerializer(serializers.ModelSerializer):
 
         instance.save()
         return instance
-
 
 
 class SubscribeSerializer(serializers.ModelSerializer):

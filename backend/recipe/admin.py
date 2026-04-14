@@ -80,7 +80,6 @@ class ReceipAdmin(admin.ModelAdmin):
     get_ingredients.short_description = 'Ингредиенты'
 
 
-
 @admin.register(Subscribe)
 class SubscribeAdmin(admin.ModelAdmin):
     """Подписки пользователей."""
