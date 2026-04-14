@@ -13,4 +13,4 @@ class AuthorOrReadOnly(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         """Разрешение на редактирование только автору или администратору."""
-        return request.user == obj.author or request.user.is_staff
+        return request.user == obj.author
