@@ -402,7 +402,7 @@ class RecipeList(viewsets.ModelViewSet):
         """Получение текстового файла с ингредиентами."""
         text_to_print = 'Нужно купить:\n'
         text_to_print += '\n'.join(
-            f'{el['name']}: {el['total']} {el['unit']} '
+            f"{el['name']}: {el['total']} {el['unit']} "
             for el in ingredients
         )
         return BytesIO(text_to_print.encode('utf-8'))
