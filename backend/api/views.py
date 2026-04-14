@@ -22,6 +22,7 @@ from recipe.models import (
     Tag,
 )
 from .filters import RecipeFilter
+from .paginations import LimitPagination
 from .permissions import AuthorOrReadOnly
 from .serializers import (
     AvatarSerializer,
@@ -46,7 +47,7 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = utils.User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (AllowAny,)
-    pagination_class = LimitOffsetPagination
+    pagination_class = LimitPagination
 
     def get_queryset(self):
         """Возвращает пользователя со связанными с ним данными."""
@@ -193,6 +194,7 @@ class RecipeList(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     permission_classes = (AuthorOrReadOnly,)
+    pagination_class = LimitPagination
     filter_backends = (filters.OrderingFilter, DjangoFilterBackend)
     filterset_class = RecipeFilter
     ordering = ('-pub_date',)
