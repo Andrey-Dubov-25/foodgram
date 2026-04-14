@@ -18,6 +18,7 @@ CSRF_TRUSTED_ORIGINS = ['https://foodgram.serveblog.net', 'http://foodgram.serve
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
+
 AUTH_USER_MODEL = 'users.MyUser'
 
 
