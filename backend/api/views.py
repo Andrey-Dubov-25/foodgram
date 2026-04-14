@@ -193,7 +193,6 @@ class RecipeList(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     permission_classes = (AuthorOrReadOnly,)
-    pagination_class = LimitOffsetPagination
     filter_backends = (filters.OrderingFilter, DjangoFilterBackend)
     filterset_class = RecipeFilter
     ordering = ('-pub_date',)
