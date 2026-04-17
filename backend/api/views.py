@@ -1,7 +1,6 @@
 from io import BytesIO
 
-from django.contrib.auth import get_user_model
-from django.db.models import Sum
+from django.db.models import F, Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 
@@ -23,6 +22,7 @@ from recipe.models import (
     ShoppingCard,
     Subscribe,
     Tag,
+    User
 )
 from .filters import RecipeFilter
 from .paginations import LimitPagination
@@ -44,9 +44,6 @@ from .serializers import (
     UserRegistrationSerializer,
     UserSerializer,
 )
-
-
-User = get_user_model()
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -303,16 +300,13 @@ class RecipeList(viewsets.ModelViewSet):
         """Скачивание ингредиентов из списка покупок."""
         user = utils.get_user(request)
 
-        shopping_card = ShoppingCard.objects.filter(
-            user=user
-        ).select_related('recipe').prefetch_related(
-            'recipe__recipe_ingredients',
-            'recipe__recipe_ingredients__ingredient'
-        ).values(
-            'recipe__recipe_ingredients__ingredient__name',
-            'recipe__recipe_ingredients__ingredient__measurement_unit'
+        shopping_card = ShoppingCard.objects.filter(user=user).values(
+            name=F('recipe__recipe_ingredients__ingredient__name'),
+            measurement_unit=F(
+                'recipe__recipe_ingredients__ingredient__measurement_unit'
+            )
         ).annotate(total=Sum('recipe__recipe_ingredients__amount')).order_by(
-            'recipe__recipe_ingredients__ingredient__name'
+            'name'
         )
 
         if not shopping_card:
@@ -320,13 +314,9 @@ class RecipeList(viewsets.ModelViewSet):
 
         data = [
             {
-                'name': ingredient[
-                    'recipe__recipe_ingredients__ingredient__name'
-                ],
+                'name': ingredient['name'],
                 'total': ingredient['total'],
-                'unit': ingredient[
-                    'recipe__recipe_ingredients__ingredient__measurement_unit'
-                ]
+                'unit': ingredient['measurement_unit']
             }
             for ingredient in shopping_card
         ]

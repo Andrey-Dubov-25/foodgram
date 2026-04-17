@@ -1,4 +1,3 @@
-from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from drf_extra_fields.fields import Base64ImageField
@@ -12,15 +11,13 @@ from recipe.models import (
     ShoppingCard,
     Subscribe,
     Tag,
+    User
 )
 from .mixins import (
     RecipeDeleteFromMixin,
     RecipeRepresentationMixin,
     UsernameValidatorMixin,
 )
-
-
-User = get_user_model()
 
 
 class UserSerializer(UsernameValidatorMixin, serializers.ModelSerializer):
@@ -323,11 +320,7 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         return value
 
     def validate(self, data):
-        """Валидация на наличие полей image, tags и ingredients."""
-        if 'image' not in data:
-            raise serializers.ValidationError(
-                'Необходимо добавить image.'
-            )
+        """Валидация на наличие полей tags и ingredients."""
         if 'tags' not in data:
             raise serializers.ValidationError('Необходимо добавить tags.')
         if 'ingredients' not in data:
