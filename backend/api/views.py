@@ -243,98 +243,49 @@ class RecipeList(viewsets.ModelViewSet):
 
     @action(
         detail=True,
-        methods=utils.post_delete_methods(),
+        methods=utils.post_method(),
         permission_classes=[IsAuthenticated]
     )
     def favorite(self, request, pk=None):
-        """Добавление/удаление рецептов в избранное."""
-        user = utils.get_user(request)
-        data = utils.get_recipe_id(pk)
-        context = utils.get_request(request)
+        """Добавление рецептов в избранное."""
+        return self.method_for_post(
+            request=request,
+            pk=pk,
+            serializer_for_model=FavoriteSerializer,
+        )
 
-        if request.method == 'POST':
-            recipe = get_object_or_404(
-                Recipe.objects.select_related('author'),
-                pk=pk
-            )
-            serializer = FavoriteSerializer(data=data, context=context)
-
-            if serializer.is_valid(raise_exception=True):
-                serializer.save()
-                return Response(
-                    serializer.data, status=status.HTTP_201_CREATED
-                )
-
-            return Response(
-                serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        if request.method == 'DELETE':
-            serializer = FavoriteDeleteSerializer(data=data, context=context)
-
-            if serializer.is_valid():
-                recipe = serializer.context['recipe']
-                favorite = get_object_or_404(
-                    Favorite, user=user, recipe=recipe
-                )
-                favorite.delete()
-
-                return Response(status=status.HTTP_204_NO_CONTENT)
-
-            errors = serializer.errors
-
-            if 'not_found' in str(errors):
-                return Response(errors, status=status.HTTP_404_NOT_FOUND)
-
-            return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+    @favorite.mapping.delete
+    def delete_favorite(self, request, pk=None):
+        """Удаление рецептов из избранного."""
+        return self.method_for_delete(
+            request=request,
+            pk=pk,
+            model=Favorite,
+            serializer_for_model=FavoriteDeleteSerializer,
+        )
 
     @action(
         detail=True,
-        methods=utils.post_delete_methods(),
+        methods=utils.post_method(),
         permission_classes=[IsAuthenticated]
     )
     def shopping_cart(self, request, pk=None):
-        """Добавление/удаление рецептов в список покупок."""
-        user = utils.get_user(request)
-        data = utils.get_recipe_id(pk)
-        context = utils.get_request(request)
+        """Добавление рецептов в список покупок."""
+        return self.method_for_post(
+            request=request,
+            pk=pk,
+            serializer_for_model=ShoppingCardSerializer,
+        )
 
-        if request.method == 'POST':
-            recipe = get_object_or_404(
-                Recipe.objects.select_related('author'),
-                pk=pk
-            )
-            serializer = ShoppingCardSerializer(data=data, context=context)
-
-            if serializer.is_valid(raise_exception=True):
-                serializer.save()
-                return Response(
-                    serializer.data, status=status.HTTP_201_CREATED
-                )
-
-            return Response(
-                serializer.errors, status=status.HTTP_400_BAD_REQUEST
-            )
-
-        if request.method == 'DELETE':
-            serializer = ShoppingCardDeleteSerializer(
-                data=data, context=context
-            )
-
-            if serializer.is_valid():
-                recipe = serializer.context['recipe']
-                favorite = get_object_or_404(
-                    ShoppingCard, user=user, recipe=recipe
-                )
-                favorite.delete()
-
-                return Response(status=status.HTTP_204_NO_CONTENT)
-
-            errors = serializer.errors
-
-            if 'not_found' in str(errors):
-                return Response(errors, status=status.HTTP_404_NOT_FOUND)
-
-            return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+    @shopping_cart.mapping.delete
+    def delete_shopping_cart(self, request, pk=None):
+        """Удаление рецептов из списка покупок."""
+        return self.method_for_delete(
+            request=request,
+            pk=pk,
+            model=ShoppingCard,
+            serializer_for_model=ShoppingCardDeleteSerializer,
+        )
 
     @action(detail=True, url_path='get-link')
     def get_link(self, request, pk=None):
@@ -390,38 +341,6 @@ class RecipeList(viewsets.ModelViewSet):
 
         return response
 
-        # shopping_card = ShoppingCard.objects.filter(
-        #     user=user
-        # ).select_related('recipe__author').prefetch_related(
-        #     'recipe__recipe_ingredients__ingredient'
-        # )
-
-        # recipes = [el.recipe for el in shopping_card]
-
-        # if not recipes:
-        #     return Response('Корзина покупок пуста!')
-
-        # ingredients = defaultdict(int)
-
-        # for recipe in recipes:
-        #     for ingredient_in_recipe in recipe.recipe_ingredients.all():
-        #         ingredient = ingredient_in_recipe.ingredient
-        #         key = (ingredient.name, ingredient.measurement_unit)
-        #         ingredients[key] += ingredient_in_recipe.amount
-
-        # data = [
-        #     {'name': name, 'total': total, 'unit': unit}
-        #     for (name, unit), total in ingredients.items()
-        # ]
-
-        # file_data = self.ingredients_to_text(data)
-
-        # response = HttpResponse(
-        #     file_data, content_type='text/plain; charset=utf-8'
-        # )
-
-        # return response
-
     @staticmethod
     def ingredients_to_text(ingredients):
         """Получение текстового файла с ингредиентами."""
@@ -431,6 +350,50 @@ class RecipeList(viewsets.ModelViewSet):
             for el in ingredients
         )
         return BytesIO(text_to_print.encode('utf-8'))
+
+    @staticmethod
+    def method_for_post(request, pk, serializer_for_model):
+        """Функция для создания объектов."""
+        context = utils.get_request(request)
+        data = utils.get_recipe_id(pk)
+        recipe = get_object_or_404(
+            Recipe.objects.select_related('author'),
+            pk=pk
+        )
+        serializer = serializer_for_model(data=data, context=context)
+
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(
+                serializer.data, status=status.HTTP_201_CREATED
+            )
+
+        return Response(
+            serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @staticmethod
+    def method_for_delete(request, pk, model, serializer_for_model):
+        """Функция для удаления объектов."""
+        user = utils.get_user(request)
+        context = utils.get_request(request)
+        data = utils.get_recipe_id(pk)
+        serializer = serializer_for_model(data=data, context=context)
+
+        if serializer.is_valid():
+            recipe = serializer.context['recipe']
+            model_obj = get_object_or_404(
+                model, user=user, recipe=recipe
+            )
+            model_obj.delete()
+
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        errors = serializer.errors
+
+        if 'not_found' in str(errors):
+            return Response(errors, status=status.HTTP_404_NOT_FOUND)
+
+        return Response(errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class TagReadOnlyModelViewSet(viewsets.ReadOnlyModelViewSet):
