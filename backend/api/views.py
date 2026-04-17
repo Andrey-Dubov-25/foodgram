@@ -354,7 +354,7 @@ class RecipeList(viewsets.ModelViewSet):
         """Функция для создания объектов."""
         context = utils.get_request(request)
         data = utils.get_recipe_id(pk)
-        recipe = get_object_or_404(
+        get_object_or_404(
             Recipe.objects.select_related('author'),
             pk=pk
         )
