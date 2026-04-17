@@ -10,8 +10,8 @@ from .views import (
 
 
 router = DefaultRouter()
-router.register('users', UserViewSet)
-router.register('recipes', RecipeList)
+router.register('users', UserViewSet, basename='myuser')
+router.register('recipes', RecipeList, basename='recipe')
 router.register('tags', TagReadOnlyModelViewSet)
 router.register('ingredients', IngredientReadOnlyModelViewSet)
 

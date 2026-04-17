@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+
 from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import (
@@ -51,14 +52,13 @@ User = get_user_model()
 class UserViewSet(viewsets.ModelViewSet):
     """Вьюсет для обработки запросов с пользователями."""
 
-    queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (AllowAny,)
     pagination_class = LimitPagination
 
     def get_queryset(self):
         """Возвращает пользователя со связанными с ним данными."""
-        return super().get_queryset().prefetch_related(
+        return User.objects.prefetch_related(
             'subscriptions',
             'subscribed_by',
             'recipes__tags',
@@ -199,7 +199,6 @@ class UserViewSet(viewsets.ModelViewSet):
 class RecipeList(viewsets.ModelViewSet):
     """Вьюсет для обработки запросов с рецептами."""
 
-    queryset = Recipe.objects.all()
     permission_classes = (IsAuthorOrReadOnly,)
     pagination_class = LimitPagination
     filter_backends = (filters.OrderingFilter, DjangoFilterBackend)
@@ -209,7 +208,7 @@ class RecipeList(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """Получение списка рецептов в завизимости от наличия параметров."""
-        return super().get_queryset().select_related(
+        return Recipe.objects.select_related(
             'author'
         ).prefetch_related(
             'tags',
