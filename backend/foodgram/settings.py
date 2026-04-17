@@ -89,6 +89,7 @@ WSGI_APPLICATION = 'foodgram.wsgi.application'
 #     }
 # }
 
+
 if DEBUG:
     DATABASES = {
         'default': {
