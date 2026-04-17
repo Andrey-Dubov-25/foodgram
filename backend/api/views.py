@@ -37,6 +37,7 @@ from .serializers import (
     RecipeWriteSerializer,
     ShoppingCardDeleteSerializer,
     ShoppingCardSerializer,
+    ShortLinkSerializer,
     SubscribeDeleteSerializer,
     SubscribeWriteSerializer,
     SubscribeReadSerializer,
@@ -286,10 +287,14 @@ class RecipeList(viewsets.ModelViewSet):
     def get_link(self, request, pk=None):
         """Получение короткой ссылки на рецепт."""
         recipe = get_object_or_404(Recipe, pk=pk)
-        short_code = str(recipe.pk)
-        relative_path = f'/recipes/{short_code}/'
-        short_url = request.build_absolute_uri(relative_path)
-        return Response({'short-link': short_url})
+        context = utils.get_request(request)
+        serializer = ShortLinkSerializer(recipe, context=context)
+        return Response(serializer.data)
+        # short_code = recipe.pk
+        # relative_path = f'/recipes/{short_code}/'
+        # short_url = request.build_absolute_uri(relative_path)
+        # return Response({'short-link': short_url})
+
 
     @action(
         detail=False,
