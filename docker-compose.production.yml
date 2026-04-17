@@ -7,6 +7,7 @@ services:
   db:
     image: postgres:13
     env_file: .env
+    restart: on-failure:3
     volumes:
       - pg_data_production:/var/lib/postgresql/data
 

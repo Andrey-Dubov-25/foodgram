@@ -1,6 +1,11 @@
+from django.contrib.auth import get_user_model
 from django.db import models
+
+from api.validators import validate_positive_number
 from core import constants
-from core.utils import User
+
+
+User = get_user_model()
 
 
 class Tag(models.Model):
@@ -71,7 +76,8 @@ class Recipe(models.Model):
         verbose_name='Изображение',
         help_text='Изображение готового блюда'
     )
-    cooking_time = models.IntegerField(
+    cooking_time = models.PositiveSmallIntegerField(
+        validators=[validate_positive_number],
         verbose_name='Время приготовления',
         help_text='Время приготовления рецепта'
     )
@@ -118,7 +124,8 @@ class IngredientRecipe(models.Model):
         help_text='Ингредиенты для рецепта',
         related_name='recipe_ingredients'
     )
-    amount = models.IntegerField(
+    amount = models.PositiveSmallIntegerField(
+        validators=[validate_positive_number],
         verbose_name='Количество',
         help_text='Количество ингредиента'
     )

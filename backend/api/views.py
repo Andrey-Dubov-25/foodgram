@@ -1,6 +1,7 @@
 from collections import defaultdict
 from io import BytesIO
 
+from django.contrib.auth import get_user_model
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import filters, permissions, status, viewsets
@@ -31,7 +32,8 @@ from .serializers import (
     FavoriteDeleteSerializer,
     FavoriteSerializer,
     IngredientSerializer,
-    RecipeSerializer,
+    RecipeReadSerializer,
+    RecipeWriteSerializer,
     ShoppingCardDeleteSerializer,
     ShoppingCardSerializer,
     SubscribeDeleteSerializer,
@@ -42,31 +44,37 @@ from .serializers import (
 )
 
 
+User = get_user_model()
+
+
 class UserViewSet(viewsets.ModelViewSet):
     """Вьюсет для обработки запросов с пользователями."""
 
-    queryset = utils.User.objects.all()
+    queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (AllowAny,)
     pagination_class = LimitPagination
 
     def get_queryset(self):
         """Возвращает пользователя со связанными с ним данными."""
-        queryset = super().get_queryset().prefetch_related(
+        return super().get_queryset().prefetch_related(
             'subscriptions',
             'subscribed_by',
             'recipes__tags',
             'recipes__recipe_ingredients__ingredient',
             'recipes__author'
         )
-        return queryset
 
-    def create(self, request, *args, **kwargs):
-        """Создание польователя."""
-        serializer = UserRegistrationSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    def get_serializer_class(self, *args, **kwargs):
+        """Возвращает сериализатор в зависимости от действия."""
+        if self.action == 'create':
+            return UserRegistrationSerializer
+        elif self.action == 'avatar':
+            return AvatarSerializer
+        elif self.action == 'set_password':
+            return ChangePasswordSerializer
+        else:
+            return UserSerializer
 
     @action(
         detail=False,
@@ -83,7 +91,6 @@ class UserViewSet(viewsets.ModelViewSet):
         detail=False,
         methods=utils.put_delete_methods(),
         url_path='me/avatar',
-        serializer_class=AvatarSerializer,
         permission_classes=[IsAuthenticated]
     )
     def avatar(self, request):
@@ -110,7 +117,6 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(
         detail=False,
         methods=utils.post_method(),
-        serializer_class=ChangePasswordSerializer,
         permission_classes=[IsAuthenticated]
     )
     def set_password(self, request):
@@ -131,7 +137,7 @@ class UserViewSet(viewsets.ModelViewSet):
     def subscribe(self, request, pk=None):
         """Добавление/удаление подписки на пользователя."""
         user = utils.get_user(request)
-        subscribe_user = get_object_or_404(utils.User, pk=pk)
+        subscribe_user = get_object_or_404(User, pk=pk)
 
         if request.method == 'POST':
             recipes_limit = request.query_params.get('recipes_limit')
@@ -193,7 +199,6 @@ class RecipeList(viewsets.ModelViewSet):
     """Вьюсет для обработки запросов с рецептами."""
 
     queryset = Recipe.objects.all()
-    serializer_class = RecipeSerializer
     permission_classes = (IsAuthorOrReadOnly,)
     pagination_class = LimitPagination
     filter_backends = (filters.OrderingFilter, DjangoFilterBackend)
@@ -203,7 +208,7 @@ class RecipeList(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """Получение списка рецептов в завизимости от наличия параметров."""
-        queryset = super().get_queryset().select_related(
+        return super().get_queryset().select_related(
             'author'
         ).prefetch_related(
             'tags',
@@ -212,30 +217,11 @@ class RecipeList(viewsets.ModelViewSet):
             'favorites_by',
             'in_shopping_card'
         )
-        user = utils.get_self_user(self)
-        is_in_card = self.request.query_params.get('is_in_shopping_cart')
-        is_in_favorite = self.request.query_params.get('is_favorited')
 
-        if not user.is_authenticated:
-            if is_in_card == '1' or is_in_favorite == '1':
-                return queryset
-
-        if is_in_card is None and is_in_favorite is None:
-            return queryset
-
-        if is_in_card == str(1):
-            cart_recipe = ShoppingCard.objects.filter(
-                user=user
-            ).values_list('recipe_id', flat=True)
-            queryset = queryset.filter(id__in=cart_recipe)
-
-        elif is_in_favorite == str(1):
-            favorite_recipe = Favorite.objects.filter(
-                user=user
-            ).values_list('recipe_id', flat=True)
-            queryset = queryset.filter(id__in=favorite_recipe)
-
-        return queryset
+    def get_serializer_class(self, *args, **kwargs):
+        if self.action in ['list', 'retrieve']:
+            return RecipeReadSerializer
+        return RecipeWriteSerializer
 
     def get_permissions(self):
         """Доступ на редактирование только автору рецепта."""
