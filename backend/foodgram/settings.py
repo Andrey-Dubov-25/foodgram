@@ -9,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv('SECRET_KEY')
 
-DEBUG = False
+DEBUG = os.getenv('DEBUG') in ['True', '1']
 
 ALLOWED_HOSTS = [
     'foodgram.serveblog.net', '158.160.209.12', 'localhost', '127.0.0.1'
