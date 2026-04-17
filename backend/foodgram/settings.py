@@ -9,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv('SECRET_KEY')
 
-DEBUG = os.getenv('DEBUG')
+DEBUG = bool(os.getenv('DEBUG'))
 
 ALLOWED_HOSTS = [
     'foodgram.serveblog.net', '158.160.209.12', 'localhost', '127.0.0.1'
@@ -89,7 +89,7 @@ WSGI_APPLICATION = 'foodgram.wsgi.application'
 #     }
 # }
 
-if bool(DEBUG):
+if DEBUG:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
