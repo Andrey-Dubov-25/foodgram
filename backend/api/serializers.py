@@ -405,8 +405,60 @@ class RecipeShortSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'image', 'cooking_time')
 
 
+class SubscribeReadSerializer(serializers.ModelSerializer):
+    """Сериализатор для расширенного представления подписки."""
 
-class SubscribeSerializer(serializers.ModelSerializer):
+    recipes = serializers.SerializerMethodField()
+    recipes_count = serializers.SerializerMethodField()
+    avatar = Base64ImageField(required=False, allow_null=True)
+    is_subscribed = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = (
+            'id',
+            'email',
+            'username',
+            'first_name',
+            'last_name',
+            'is_subscribed',
+            'recipes',
+            'recipes_count',
+            'avatar'
+        )
+
+    def get_is_subscribed(self, obj):
+        """Возвращает булевое значение о подписке на позьзователя."""
+        request = utils.get_context_request(self)
+
+        if not request or not request.user.is_authenticated:
+            return False
+
+        return Subscribe.objects.filter(
+            user=request.user, subscribing=obj
+        ).exists()
+
+    def get_recipes_count(self, obj):
+        """Возвращает количество рецептов пользователя."""
+        return obj.recipes.count()
+
+    def get_recipes(self, obj):
+        """Возвращает рецепты пользователя."""
+        request = utils.get_context_request(self)
+        recipes_queryset = obj.recipes.all()
+        recipes_limit = request.query_params.get('recipes_limit')
+
+        if recipes_limit is not None:
+            limit = int(recipes_limit)
+
+            if limit >= 0:
+                recipes_queryset = recipes_queryset[:limit]
+
+        serializer = RecipeShortSerializer(recipes_queryset, many=True)
+        return serializer.data
+
+
+class SubscribeWriteSerializer(serializers.ModelSerializer):
     """Сериализатор для подписок."""
 
     subscribing = serializers.PrimaryKeyRelatedField(
@@ -443,114 +495,11 @@ class SubscribeSerializer(serializers.ModelSerializer):
         подписываются. Можно добавить фильтрацию по recipes_limit - количестве
         выводимых рецептов у пользователя.
         """
-        request = utils.get_context_request(self)
         subscribing = instance.subscribing
-        recipes_queryset = subscribing.recipes.all()
-        recipe_count = subscribing.recipes.count()
-        recipes_limit = request.query_params.get('recipes_limit')
-
-        if recipes_limit is not None:
-            limit = int(recipes_limit)
-
-            if limit >= 0:
-                recipes_queryset = recipes_queryset[:limit]
-
-        recipe_in_data = [
-            {
-                'id': recipe.id,
-                'name': recipe.name,
-                'image': recipe.image.url if recipe.image else None,
-                'cooking_time': recipe.cooking_time
-            } for recipe in recipes_queryset
-        ]
-
-        is_subscribed = Subscribe.objects.filter(
-            user=request.user, subscribing=subscribing
-        ).exists()
-
-        data = {
-            'email': subscribing.email,
-            'id': subscribing.id,
-            'username': subscribing.username,
-            'first_name': subscribing.first_name,
-            'last_name': subscribing.last_name,
-            'is_subscribed': is_subscribed,
-            'recipes': recipe_in_data,
-            'recipes_count': recipe_count,
-            'avatar': subscribing.avatar.url if subscribing.avatar else None
-        }
-
-        return data
-
-
-# class SubscribeWriteSerializer(serializers.ModelSerializer):
-#     """Сериализатор создания подписки."""
-
-#     recipes = serializers.SerializerMethodField()
-#     recipes_count = serializers.SerializerMethodField()
-#     avatar = Base64ImageField(required=False, allow_null=True)
-#     is_subscribed = serializers.SerializerMethodField()
-
-#     class Meta:
-#         model = User
-#         fields = (
-#             'id',
-#             'email',
-#             'username',
-#             'first_name',
-#             'last_name',
-#             'is_subscribed',
-#             'recipes',
-#             'recipes_count',
-#             'avatar'
-#         )
-    
-#     def validate(self, data):
-#         """Валидация подписки на самого себя или повторной подписки."""
-#         current_user = utils.get_context_request(self).user
-#         subscribing = data.get('subscribing')
-
-#         if current_user == subscribing:
-#             raise serializers.ValidationError(
-#                 'Нельзя оформить подписку на самого себя!'
-#             )
-
-#         if Subscribe.objects.filter(
-#             user=current_user, subscribing=subscribing
-#         ).exists():
-#             raise serializers.ValidationError(
-#                 'Вы уже подписаны на этого пользователя!'
-#             )
-
-#         return data
-
-#     def get_is_subscribed(self, obj):
-#         """Возвращает булевое значение о подписке на позьзователя."""
-#         request = utils.get_context_request(self)
-
-#         if not request or not request.user.is_authenticated:
-#             return False
-
-#         return Subscribe.objects.filter(
-#             user=request.user, subscribing=obj
-#         ).exists()
-
-#     def get_recipes_count(self, obj):
-#         """Возвращает количество рецептов пользователя."""
-#         return obj.recipes.count()
-
-#     def get_recipes(self, obj):
-#         recipes_queryset = obj.recipes.all()
-#         recipes_limit = self.context.get('recipes_limit')
-
-#         if self.recipes_limit is not None:
-#             limit = int(recipes_limit)
-
-#             if limit >= 0:
-#                 recipes_queryset = recipes_queryset[:limit]
-
-#         serializer = RecipeShortSerializer(recipes_queryset, many=True)
-#         return serializer.data
+        serializers = SubscribeReadSerializer(
+            subscribing, context=self.context
+        )
+        return serializers.data
 
 
 class SubscribeDeleteSerializer(serializers.Serializer):

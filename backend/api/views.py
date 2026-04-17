@@ -2,6 +2,7 @@ from collections import defaultdict
 from io import BytesIO
 
 from django.contrib.auth import get_user_model
+from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import filters, permissions, status, viewsets
@@ -37,7 +38,8 @@ from .serializers import (
     ShoppingCardDeleteSerializer,
     ShoppingCardSerializer,
     SubscribeDeleteSerializer,
-    SubscribeSerializer,
+    SubscribeWriteSerializer,
+    SubscribeReadSerializer,
     TagSerializer,
     UserRegistrationSerializer,
     UserSerializer,
@@ -145,7 +147,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 'user': user, 'subscribing': subscribe_user.id
             }
             context = {'request': request, 'recipes_limit': recipes_limit}
-            serializer = SubscribeSerializer(data=data, context=context)
+            serializer = SubscribeWriteSerializer(data=data, context=context)
 
             if serializer.is_valid(raise_exception=True):
                 serializer.save()
@@ -184,14 +186,14 @@ class UserViewSet(viewsets.ModelViewSet):
     def subscriptions(self, request):
         """Получение информации о своих подписках."""
         user = utils.get_user(request)
+        recipes_limit = request.query_params.get('recipes_limit')
         subscriptions = Subscribe.objects.filter(user=user).select_related(
             'subscribing'
         ).prefetch_related('subscribing__recipes')
         page = self.paginate_queryset(subscriptions)
-        serializer = SubscribeSerializer(
-            page, many=True,
-            context={'request': request}
-        )
+        users = [user_sub.subscribing for user_sub in page]
+        context = {'request': request, 'recipes_limit': recipes_limit}
+        serializer = SubscribeReadSerializer(users, many=True, context=context)
         return self.get_paginated_response(serializer.data)
 
 
@@ -219,7 +221,8 @@ class RecipeList(viewsets.ModelViewSet):
         )
 
     def get_serializer_class(self, *args, **kwargs):
-        if self.action in ['list', 'retrieve']:
+        """Возвращает сериализатор в зависимости от чтения или записи."""
+        if self.action in utils.list_retrieve_methods():
             return RecipeReadSerializer
         return RecipeWriteSerializer
 
@@ -353,26 +356,30 @@ class RecipeList(viewsets.ModelViewSet):
 
         shopping_card = ShoppingCard.objects.filter(
             user=user
-        ).select_related('recipe__author').prefetch_related(
+        ).select_related('recipe').prefetch_related(
+            'recipe__recipe_ingredients',
             'recipe__recipe_ingredients__ingredient'
+        ).values(
+            'recipe__recipe_ingredients__ingredient__name',
+            'recipe__recipe_ingredients__ingredient__measurement_unit'
+        ).annotate(total=Sum('recipe__recipe_ingredients__amount')).order_by(
+            'recipe__recipe_ingredients__ingredient__name'
         )
 
-        recipes = [el.recipe for el in shopping_card]
-
-        if not recipes:
+        if not shopping_card:
             return Response('Корзина покупок пуста!')
 
-        ingredients = defaultdict(int)
-
-        for recipe in recipes:
-            for ingredient_in_recipe in recipe.recipe_ingredients.all():
-                ingredient = ingredient_in_recipe.ingredient
-                key = (ingredient.name, ingredient.measurement_unit)
-                ingredients[key] += ingredient_in_recipe.amount
-
         data = [
-            {'name': name, 'total': total, 'unit': unit}
-            for (name, unit), total in ingredients.items()
+            {
+                'name': ingredient[
+                    'recipe__recipe_ingredients__ingredient__name'
+                ],
+                'total': ingredient['total'],
+                'unit': ingredient[
+                    'recipe__recipe_ingredients__ingredient__measurement_unit'
+                ]
+            }
+            for ingredient in shopping_card
         ]
 
         file_data = self.ingredients_to_text(data)
@@ -382,6 +389,38 @@ class RecipeList(viewsets.ModelViewSet):
         )
 
         return response
+
+        # shopping_card = ShoppingCard.objects.filter(
+        #     user=user
+        # ).select_related('recipe__author').prefetch_related(
+        #     'recipe__recipe_ingredients__ingredient'
+        # )
+
+        # recipes = [el.recipe for el in shopping_card]
+
+        # if not recipes:
+        #     return Response('Корзина покупок пуста!')
+
+        # ingredients = defaultdict(int)
+
+        # for recipe in recipes:
+        #     for ingredient_in_recipe in recipe.recipe_ingredients.all():
+        #         ingredient = ingredient_in_recipe.ingredient
+        #         key = (ingredient.name, ingredient.measurement_unit)
+        #         ingredients[key] += ingredient_in_recipe.amount
+
+        # data = [
+        #     {'name': name, 'total': total, 'unit': unit}
+        #     for (name, unit), total in ingredients.items()
+        # ]
+
+        # file_data = self.ingredients_to_text(data)
+
+        # response = HttpResponse(
+        #     file_data, content_type='text/plain; charset=utf-8'
+        # )
+
+        # return response
 
     @staticmethod
     def ingredients_to_text(ingredients):

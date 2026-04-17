@@ -28,6 +28,11 @@ def post_delete_methods():
     return ['post', 'delete']
 
 
+def list_retrieve_methods():
+    """Возвращает параметры запроса post и delete."""
+    return ['list', 'retrieve']
+
+
 def get_request(request):
     """Возвращает словарь контекста с объектом запроса."""
     return {'request': request}
