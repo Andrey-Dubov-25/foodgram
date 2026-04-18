@@ -1,3 +1,6 @@
+import string
+import random
+
 from django.contrib.auth import get_user_model
 from django.db import models
 
@@ -97,6 +100,14 @@ class Recipe(models.Model):
         verbose_name='Дата публикации',
         help_text='Дата публикации рецепта'
     )
+    short_link = models.CharField(
+        max_length=64,
+        unique=True,
+        blank=True,
+        null=True,
+        verbose_name='Короткая ссылка',
+        help_text='Короткая ссылка на рецепт'
+    )
 
     class Meta:
         verbose_name = 'рецепт'
@@ -106,6 +117,18 @@ class Recipe(models.Model):
         """Возвращает строковое представление."""
         return self.name
 
+    def save(self, *args, **kwargs):
+        if not self.short_link:
+            self.short_link = self.generate_short_link()
+        super().save(*args, **kwargs)
+
+    def generate_short_link(self):
+        """Генерирует уникальный короткий код."""
+        chars = string.ascii_letters + string.digits
+        while True:
+            code = ''.join(random.choice(chars) for _ in range(5))
+            if not Recipe.objects.filter(short_link=code).exists():
+                return code
 
 class IngredientRecipe(models.Model):
     """Промежуточная модель для связи ингредиентов и рецептов."""

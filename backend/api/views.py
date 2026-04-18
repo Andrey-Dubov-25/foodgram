@@ -4,6 +4,7 @@ from django.db.models import F, Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
+from django.views.generic import RedirectView
 
 from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
@@ -44,6 +45,7 @@ from .serializers import (
     TagSerializer,
     UserRegistrationSerializer,
     UserSerializer,
+    RecipeShortLinkSerializer
 )
 
 
@@ -286,11 +288,9 @@ class RecipeList(viewsets.ModelViewSet):
     @action(detail=True, url_path='get-link')
     def get_link(self, request, pk=None):
         """Генерация короткой ссылки на рецепт."""
-        get_object_or_404(Recipe, pk=pk)
-        short_url = request.build_absolute_uri(
-            reverse('short-link', args=(pk,))
-        )
-        return Response({'short-link': short_url}, status=status.HTTP_200_OK)
+        recipe = get_object_or_404(Recipe, pk=pk)
+        serializer = RecipeShortLinkSerializer(recipe)
+        return Response(serializer.data)
 
     @action(
         detail=False,
@@ -403,3 +403,12 @@ class IngredientReadOnlyModelViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('name',)
+
+class ShortLinkRedirectView(RedirectView):
+    permanent = False
+
+    def get_redirect_url(self, *args, **kwargs):
+        hash_id = kwargs['hash_id']
+        recipe = get_object_or_404(Recipe, short_link_hash=hash_id)
+        # Укажите URL страницы рецепта (адаптируйте под вашу структуру)
+        return f'/recipes/{recipe.id}/'
