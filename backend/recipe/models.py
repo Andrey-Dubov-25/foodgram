@@ -138,6 +138,7 @@ class Recipe(models.Model):
             if not Recipe.objects.filter(short_link=code).exists():
                 return final_code
 
+
 class IngredientRecipe(models.Model):
     """Промежуточная модель для связи ингредиентов и рецептов."""
 

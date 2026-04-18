@@ -287,16 +287,28 @@ class RecipeList(viewsets.ModelViewSet):
     def get_link(self, request, pk=None):
         """Генерация короткой ссылки на рецепт."""
         recipe = get_object_or_404(Recipe, pk=pk)
-        short_url = request.build_absolute_uri(
-            reverse(
-                'redirect_short_link',
-                kwargs={'short_link': recipe.short_link},
-            )
-        )
-        return Response(
-            {'short-link': short_url},
-            status=status.HTTP_200_OK,
-        )
+        short_url = request.build_absolute_uri(f'/s/{recipe.short_link}/')
+        return Response({'short-link': short_url})
+
+    # @action(detail=True, url_path='get-link')
+    # def get_link(self, request, pk=None):
+    #     """Генерация короткой ссылки на рецепт."""
+    #     short_url_code = get_object_or_404(Recipe, pk=pk).short_link
+    #     short_url = request.build_absolute_uri(
+    #         reverse('recipes:shortlink', args=(short_url_code,))
+    #     )
+    #     return Response({'short-link': short_url})
+
+    @action(
+        detail=False,
+        methods=['get'],
+        url_path='s/(?P<short_link>[^/]+)',
+    )
+    def by_short_link(self, request, short_link=None):
+        """Получить рецепт по короткой ссылке."""
+        recipe = get_object_or_404(Recipe, short_link=short_link)
+        serializer = self.get_serializer(recipe)
+        return Response(serializer.data)
 
     @action(
         detail=False,

@@ -4,12 +4,16 @@ from django.contrib import admin
 from django.urls import include, path
 
 from api import urls as api
+from api.views import RecipeList
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(api)),
-    path('', include('recipe.urls')),
+    path(
+        's/<str:short_link>/',
+        RecipeList.as_view({'get': 'by_short_link'})
+    )
 ]
 
 
