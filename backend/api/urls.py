@@ -6,7 +6,6 @@ from .views import (
     RecipeList,
     TagReadOnlyModelViewSet,
     UserViewSet,
-    short_link_view
 )
 
 
@@ -24,5 +23,4 @@ urlpatterns = [
     path(
         'recipes/<int:pk>/get-link/', RecipeList.as_view({'get': 'get_link'}),
     ),
-    path('short-link/<int:pk>/', short_link_view, name='short_link'),
 ]

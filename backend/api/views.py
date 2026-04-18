@@ -2,7 +2,7 @@ from io import BytesIO
 
 from django.db.models import F, Sum
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404
 from django.urls import reverse
 
 from rest_framework import filters, permissions, status, viewsets
@@ -404,8 +404,3 @@ class IngredientReadOnlyModelViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('name',)
-
-
-def short_link_view(request, pk):
-    """Возвращает страницу рецепта по короткой ссылке."""
-    return redirect('recipe-detail', pk=pk)
