@@ -20,7 +20,4 @@ urlpatterns = [
     path('', include(router.urls)),
     path('auth/', include('djoser.urls')),
     path('auth/', include('djoser.urls.authtoken')),
-    path(
-        'recipes/<int:pk>/get-link/', RecipeList.as_view({'get': 'get_link'}),
-    ),
 ]

@@ -4,5 +4,5 @@ from .views import recipe_for_short_link
 
 
 urlpatterns = [
-    path('<int:pk>/', recipe_for_short_link, name='short_link'),
+    path('<int:pk>/', recipe_for_short_link, name='short-link'),
 ]
