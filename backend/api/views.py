@@ -2,8 +2,8 @@ from io import BytesIO
 
 from django.db.models import F, Sum
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404
-# from django.urls import reverse
+from django.shortcuts import get_object_or_404, redirect
+from django.views.generic import View
 
 from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
@@ -301,17 +301,6 @@ class RecipeList(viewsets.ModelViewSet):
 
     @action(
         detail=False,
-        methods=['get'],
-        url_path=r's/(?P<short_link>[^/]+)',
-    )
-    def by_short_link(self, request, short_link=None):
-        """Получить рецепт по короткой ссылке."""
-        recipe = get_object_or_404(Recipe, short_link=short_link)
-        serializer = self.get_serializer(recipe)
-        return Response(serializer.data)
-
-    @action(
-        detail=False,
         methods=utils.get_method(),
         permission_classes=[IsAuthenticated]
     )
@@ -421,3 +410,13 @@ class IngredientReadOnlyModelViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('name',)
+
+
+class ShortLinkView(View):
+    """Получение рецепта по короткой ссылке."""
+
+    def get(self, request, short_link):
+        """Возвращает рецепт по короткой ссылке."""
+        recipe = get_object_or_404(Recipe, short_link=short_link)
+        recipe_id = recipe.id
+        return redirect(f'/recipes/{recipe_id}/')
