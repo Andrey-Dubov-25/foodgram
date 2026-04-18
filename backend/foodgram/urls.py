@@ -10,7 +10,11 @@ from api.views import ShortLinkView
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(api)),
-    path('s/<str:short_link>/', ShortLinkView.as_view())
+    path(
+        's/<str:short_link>/',
+        ShortLinkView.as_view(),
+        name='redirect_short_link'
+    )
 ]
 
 
