@@ -18,6 +18,11 @@ router.register('ingredients', IngredientReadOnlyModelViewSet)
 
 
 urlpatterns = [
+    re_path(
+        r'^s/(?P<code>[a-zA-Z0-9]+)$',
+        ShortLinkRedirectView.as_view(),
+        name='short-link-redirect'
+    ),
     path('', include(router.urls)),
     path('auth/', include('djoser.urls')),
     path('auth/', include('djoser.urls.authtoken')),
@@ -25,12 +30,5 @@ urlpatterns = [
         'recipes/<int:pk>/get-link/',
         RecipeList.as_view({'get': 'get_link'}),
         name='recipe-short-link'
-    ),
-
-    # Маршрут для обработки коротких ссылок (/s/<hash>)
-    re_path(
-        r'^s/(?P<code>[a-zA-Z0-9]+)$',
-        ShortLinkRedirectView.as_view(),
-        name='short-link-redirect'
     ),
 ]
