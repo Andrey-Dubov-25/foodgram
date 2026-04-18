@@ -1,5 +1,5 @@
-import string
-import random
+from string import ascii_lowercase, digits
+from random import choice
 
 from django.contrib.auth import get_user_model
 from django.db import models
@@ -118,17 +118,25 @@ class Recipe(models.Model):
         return self.name
 
     def save(self, *args, **kwargs):
+        """Добавление кода для рецепта."""
         if not self.short_link:
             self.short_link = self.generate_short_link()
         super().save(*args, **kwargs)
 
     def generate_short_link(self):
-        """Генерирует уникальный короткий код."""
-        chars = string.ascii_letters + string.digits
+        """Возвращает уникальный код для рецепта."""
+        chars = ascii_lowercase + digits
+
         while True:
-            code = ''.join(random.choice(chars) for _ in range(5))
+            code = []
+
+            for _ in range(5):
+                code.append(choice(chars))
+
+            final_code = ''.join(code)
+
             if not Recipe.objects.filter(short_link=code).exists():
-                return code
+                return final_code
 
 class IngredientRecipe(models.Model):
     """Промежуточная модель для связи ингредиентов и рецептов."""

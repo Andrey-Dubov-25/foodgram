@@ -9,6 +9,7 @@ from api import urls as api
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(api)),
+    path('', include('recipe.urls')),
 ]
 
 

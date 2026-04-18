@@ -161,5 +161,3 @@ DJOSER = {
         'user': ['djoser.permissions.CurrentUserOrAdminOrReadOnly'],
     }
 }
-
-BASE_URL = 'https://foodgram.serveblog.net'

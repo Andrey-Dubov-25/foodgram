@@ -1,4 +1,4 @@
-from django.urls import include, path, re_path
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from .views import (
@@ -6,7 +6,6 @@ from .views import (
     RecipeList,
     TagReadOnlyModelViewSet,
     UserViewSet,
-    ShortLinkRedirectView
 )
 
 
@@ -18,17 +17,7 @@ router.register('ingredients', IngredientReadOnlyModelViewSet)
 
 
 urlpatterns = [
-    re_path(
-        r'^s/(?P<code>[a-zA-Z0-9]+)$',
-        ShortLinkRedirectView.as_view(),
-        name='short-link-redirect'
-    ),
     path('', include(router.urls)),
     path('auth/', include('djoser.urls')),
     path('auth/', include('djoser.urls.authtoken')),
-    path(
-        'recipes/<int:pk>/get-link/',
-        RecipeList.as_view({'get': 'get_link'}),
-        name='recipe-short-link'
-    ),
 ]

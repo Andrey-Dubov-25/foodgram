@@ -594,18 +594,3 @@ class ShoppingCardDeleteSerializer(
     def get_error_message(self):
         """Возвращает сообщение об ошибке."""
         return 'Рецепт не найден в списке покупок.'
-
-class RecipeShortLinkSerializer(serializers.ModelSerializer):
-    short_link = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Recipe
-        fields = ['short_link']
-
-    def get_short_link(self, obj):
-        base_url = getattr(settings, 'BASE_URL', 'https://foodgram.serveblog.net')
-        return f'{base_url}/s/{obj.short_link}'
-
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        return {'short-link': data['short_link']}
