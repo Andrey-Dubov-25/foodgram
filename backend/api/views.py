@@ -290,26 +290,6 @@ class RecipeList(viewsets.ModelViewSet):
         short_url = request.build_absolute_uri(f'/s/{recipe.short_link}/')
         return Response({'short-link': short_url})
 
-    # @action(detail=True, url_path='get-link')
-    # def get_link(self, request, pk=None):
-    #     """Генерация короткой ссылки на рецепт."""
-    #     short_url_code = get_object_or_404(Recipe, pk=pk).short_link
-    #     short_url = request.build_absolute_uri(
-    #         reverse('recipes:shortlink', args=(short_url_code,))
-    #     )
-    #     return Response({'short-link': short_url})
-
-    @action(
-        detail=False,
-        methods=['get'],
-        url_path=r'^s/(?P<short_link>[a-zA-Z0-9]{5})/$',
-    )
-    def by_short_link(self, request, short_link=None):
-        """Получить рецепт по короткой ссылке."""
-        recipe = get_object_or_404(Recipe, short_link=short_link)
-        recipe_id = recipe.id
-        return redirect(f'recipes/{recipe_id}')
-
     @action(
         detail=False,
         methods=utils.get_method(),
@@ -423,20 +403,11 @@ class IngredientReadOnlyModelViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_fields = ('name',)
 
 
-# class ShortLinkView(View):
-#     """Получение рецепта по короткой ссылке."""
+class ShortLinkView(View):
+    """Получение рецепта по короткой ссылке."""
 
-#     def get(self, request, short_link):
-#         """Возвращает рецепт по короткой ссылке."""
-#         recipe = get_object_or_404(Recipe, short_link=short_link)
-#         recipe_id = recipe.id
-#         return redirect(f'recipes/{recipe_id}')
-
-# class ShortLinkView(View):
-#     """Получение рецепта по короткой ссылке."""
-
-#     def get(self, request, short_link):
-#         """Возвращает рецепт по короткой ссылке."""
-#         recipe = get_object_or_404(Recipe, short_link=short_link)
-#         recipe_id = recipe.id
-#         return redirect(f'/recipes/{recipe_id}/')
+    def get(self, request, short_link):
+        """Возвращает страницу рецепт по короткой ссылке."""
+        recipe = get_object_or_404(Recipe, short_link=short_link)
+        recipe_id = recipe.id
+        return redirect(f'/recipes/{recipe_id}/')
