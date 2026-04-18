@@ -2,7 +2,8 @@ from io import BytesIO
 
 from django.db.models import F, Sum
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse
 
 from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
@@ -285,16 +286,13 @@ class RecipeList(viewsets.ModelViewSet):
 
     @action(detail=True, url_path='get-link')
     def get_link(self, request, pk=None):
-        """Получение короткой ссылки на рецепт."""
+        """Генерация короткой ссылки на рецепт."""
         recipe = get_object_or_404(Recipe, pk=pk)
-        context = utils.get_request(request)
-        serializer = ShortLinkSerializer(recipe, context=context)
-        return Response(serializer.data)
-        # short_code = recipe.pk
-        # relative_path = f'/recipes/{short_code}/'
-        # short_url = request.build_absolute_uri(relative_path)
-        # return Response({'short-link': short_url})
-
+        short_code = recipe.id
+        short_url = request.build_absolute_uri(
+            reverse('short_link', args=(short_code,))
+        )
+        return Response({'short-link': short_url}, status=status.HTTP_200_OK)
 
     @action(
         detail=False,
@@ -407,3 +405,8 @@ class IngredientReadOnlyModelViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('name',)
+
+
+def short_link_view(request, pk):
+    """Возвращает страницу рецепта по короткой ссылке."""
+    return redirect('recipe-detail', pk=pk)
