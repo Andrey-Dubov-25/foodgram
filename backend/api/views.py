@@ -38,7 +38,6 @@ from .serializers import (
     RecipeWriteSerializer,
     ShoppingCardDeleteSerializer,
     ShoppingCardSerializer,
-    ShortLinkSerializer,
     SubscribeDeleteSerializer,
     SubscribeWriteSerializer,
     SubscribeReadSerializer,
