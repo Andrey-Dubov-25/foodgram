@@ -307,8 +307,8 @@ class RecipeList(viewsets.ModelViewSet):
     def by_short_link(self, request, short_link=None):
         """Получить рецепт по короткой ссылке."""
         recipe = get_object_or_404(Recipe, short_link=short_link)
-        serializer = self.get_serializer(recipe)
-        return Response(serializer.data)
+        recipe_id = recipe.id
+        return redirect(f'recipes/{recipe_id}')
 
     @action(
         detail=False,
@@ -423,14 +423,14 @@ class IngredientReadOnlyModelViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_fields = ('name',)
 
 
-class ShortLinkView(View):
-    """Получение рецепта по короткой ссылке."""
+# class ShortLinkView(View):
+#     """Получение рецепта по короткой ссылке."""
 
-    def get(self, request, short_link):
-        """Возвращает рецепт по короткой ссылке."""
-        recipe = get_object_or_404(Recipe, short_link=short_link)
-        recipe_id = recipe.id
-        return redirect(f'recipes/{recipe_id}')
+#     def get(self, request, short_link):
+#         """Возвращает рецепт по короткой ссылке."""
+#         recipe = get_object_or_404(Recipe, short_link=short_link)
+#         recipe_id = recipe.id
+#         return redirect(f'recipes/{recipe_id}')
 
 # class ShortLinkView(View):
 #     """Получение рецепта по короткой ссылке."""
