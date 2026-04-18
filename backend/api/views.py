@@ -302,7 +302,7 @@ class RecipeList(viewsets.ModelViewSet):
     @action(
         detail=False,
         methods=['get'],
-        url_path='s/(?P<short_link>[^/]+)',
+        url_path=r's/(?P<short_link>[^/]+)',
     )
     def by_short_link(self, request, short_link=None):
         """Получить рецепт по короткой ссылке."""
