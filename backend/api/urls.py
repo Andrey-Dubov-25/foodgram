@@ -29,7 +29,7 @@ urlpatterns = [
 
     # Маршрут для обработки коротких ссылок (/s/<hash>)
     re_path(
-        r'^s/(?P<hash_id>[a-zA-Z0-9]+)$',
+        r'^s/(?P<code>[a-zA-Z0-9]+)$',
         ShortLinkRedirectView.as_view(),
         name='short-link-redirect'
     ),

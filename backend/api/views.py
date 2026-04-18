@@ -408,7 +408,6 @@ class ShortLinkRedirectView(RedirectView):
     permanent = False
 
     def get_redirect_url(self, *args, **kwargs):
-        hash_id = kwargs['hash_id']
-        recipe = get_object_or_404(Recipe, short_link_hash=hash_id)
-        # Укажите URL страницы рецепта (адаптируйте под вашу структуру)
+        code = kwargs['code']
+        recipe = get_object_or_404(Recipe, short_link=code)
         return f'/recipes/{recipe.id}/'
