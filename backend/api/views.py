@@ -284,12 +284,20 @@ class RecipeList(viewsets.ModelViewSet):
             serializer_for_model=ShoppingCardDeleteSerializer,
         )
 
-    @action(detail=True, url_path='get-link')
+    # @action(detail=True, url_path='get-link')
+    # def get_link(self, request, pk=None):
+    #     """Генерация короткой ссылки на рецепт."""
+    #     recipe = get_object_or_404(Recipe, pk=pk)
+    #     short_url = request.build_absolute_uri(f'/s/{recipe.short_link}/')
+    #     return Response({'short-link': short_url})
+    @action(detail=True, methods=['get'], url_path='get-link')
     def get_link(self, request, pk=None):
         """Генерация короткой ссылки на рецепт."""
         recipe = get_object_or_404(Recipe, pk=pk)
-        short_url = request.build_absolute_uri(f'/s/{recipe.short_link}/')
-        return Response({'short-link': short_url})
+        short_url = request.build_absolute_uri(
+            reverse('short_link', args=[recipe.short_link])
+        )
+        return Response({'short-link': short_url}, status=status.HTTP_200_OK)
 
     @action(
         detail=False,
