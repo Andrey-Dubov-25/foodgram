@@ -295,7 +295,7 @@ class RecipeList(viewsets.ModelViewSet):
         """Генерация короткой ссылки на рецепт."""
         recipe = get_object_or_404(Recipe, pk=pk)
         short_url = request.build_absolute_uri(
-            reverse('short_link', args=[recipe.short_link])
+            reverse('short_link', args=[recipe.pk])
         )
         return Response({'short-link': short_url}, status=status.HTTP_200_OK)
 
@@ -412,12 +412,17 @@ class IngredientReadOnlyModelViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_fields = ('name',)
 
 
-class ShortLinkView(View):
-    """Получение рецепта по короткой ссылке."""
+# class ShortLinkView(View):
+#     """Получение рецепта по короткой ссылке."""
 
-    def get(self, request, short_link):
-        """Возвращает страницу рецепт по короткой ссылке."""
-        recipe = get_object_or_404(Recipe, short_link=short_link)
-        recipe_id = recipe.id
-        url = reverse('recipe-detail', kwargs={'pk': recipe_id})
-        return redirect(url)
+#     def get(self, request, short_link):
+#         """Возвращает страницу рецепт по короткой ссылке."""
+#         recipe = get_object_or_404(Recipe, short_link=short_link)
+#         recipe_id = recipe.id
+#         url = reverse('recipe-detail', kwargs={'pk': recipe_id})
+#         return redirect(url)
+
+def short_link_view(request, id):
+    """Перенаправление на рецепт по короткой ссылке."""
+    recipe = get_object_or_404(Recipe, pk=id)
+    return redirect('recipe-detail', pk=recipe.pk)
