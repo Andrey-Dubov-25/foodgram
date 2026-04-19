@@ -3,19 +3,19 @@ from typing import Any, Union, Self
 from django.contrib.auth.models import AnonymousUser
 from rest_framework.request import Request
 
-from users.models import User
+from users.models import CustomUser
 
 
 StringList = list[str]
 DictAny = dict[str, Any]
 
 
-def get_user(request: Request) -> Union[User, AnonymousUser]:
+def get_user(request: Request) -> Union[CustomUser, AnonymousUser]:
     """Возвращает текущего пользователя через request."""
     return request.user
 
 
-def get_self_user(self: Self) -> Union[User, AnonymousUser]:
+def get_self_user(self: Self) -> Union[CustomUser, AnonymousUser]:
     """Возвращает текущего пользователя через self."""
     return self.request.user
 
