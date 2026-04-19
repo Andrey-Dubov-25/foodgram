@@ -4,7 +4,6 @@ from django.db.models import F, Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.views.generic import View
-from django.urls import reverse
 
 from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
@@ -403,15 +402,7 @@ class IngredientReadOnlyModelViewSet(viewsets.ReadOnlyModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('name',)
 
-# class ShortLinkView(View):
-#     """Получение рецепта по короткой ссылке."""
 
-#     def get(self, request, short_link):
-#         """Возвращает страницу рецепт по короткой ссылке."""
-#         recipe = get_object_or_404(Recipe, short_link=short_link)
-#         recipe_id = recipe.id
-#         url = reverse('recipe-detail', kwargs={'pk': recipe_id})
-#         return redirect(url)
 class ShortLinkView(View):
     """Получение рецепта по короткой ссылке."""
 
