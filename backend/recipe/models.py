@@ -1,4 +1,3 @@
-from string import ascii_lowercase, digits
 from random import choice
 
 from django.contrib.auth import get_user_model
@@ -101,7 +100,7 @@ class Recipe(models.Model):
         help_text='Дата публикации рецепта'
     )
     short_link = models.CharField(
-        max_length=64,
+        max_length=constants.SHORT_LINK_LEN,
         unique=True,
         blank=True,
         null=True,
@@ -125,12 +124,12 @@ class Recipe(models.Model):
 
     def generate_short_link(self):
         """Возвращает уникальный код для рецепта."""
-        chars = ascii_lowercase + digits
+        chars = constants.CHARS
 
         while True:
             code = []
 
-            for _ in range(5):
+            for _ in range(constants.SHORT_LINK_LEN):
                 code.append(choice(chars))
 
             final_code = ''.join(code)

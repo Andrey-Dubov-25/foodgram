@@ -4,6 +4,7 @@ from django.db.models import F, Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.views.generic import View
+from django.urls import reverse
 
 from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
@@ -410,4 +411,5 @@ class ShortLinkView(View):
         """Возвращает страницу рецепт по короткой ссылке."""
         recipe = get_object_or_404(Recipe, short_link=short_link)
         recipe_id = recipe.id
-        return redirect(f'/recipes/{recipe_id}/')
+        url = reverse('recipe-detail', kwargs={'pk': recipe_id})
+        return redirect(url)

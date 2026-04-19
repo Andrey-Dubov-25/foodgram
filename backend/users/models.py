@@ -4,7 +4,7 @@ from django.db import models
 from core import constants
 
 
-class MyUser(AbstractUser):
+class User(AbstractUser):
     """Кастомная модель пользователя."""
 
     first_name = models.CharField(
