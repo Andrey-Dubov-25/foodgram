@@ -284,20 +284,12 @@ class RecipeList(viewsets.ModelViewSet):
             serializer_for_model=ShoppingCardDeleteSerializer,
         )
 
-    # @action(detail=True, url_path='get-link')
-    # def get_link(self, request, pk=None):
-    #     """Генерация короткой ссылки на рецепт."""
-    #     recipe = get_object_or_404(Recipe, pk=pk)
-    #     short_url = request.build_absolute_uri(f'/s/{recipe.short_link}/')
-    #     return Response({'short-link': short_url})
-    @action(detail=True, methods=['get'], url_path='get-link')
+    @action(detail=True, url_path='get-link')
     def get_link(self, request, pk=None):
         """Генерация короткой ссылки на рецепт."""
         recipe = get_object_or_404(Recipe, pk=pk)
-        short_url = request.build_absolute_uri(
-            reverse('short_link', args=[recipe.pk])
-        )
-        return Response({'short-link': short_url}, status=status.HTTP_200_OK)
+        short_url = request.build_absolute_uri(f'/s/{recipe.short_link}/')
+        return Response({'short-link': short_url})
 
     @action(
         detail=False,
@@ -411,7 +403,6 @@ class IngredientReadOnlyModelViewSet(viewsets.ReadOnlyModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('name',)
 
-
 # class ShortLinkView(View):
 #     """Получение рецепта по короткой ссылке."""
 
@@ -421,8 +412,11 @@ class IngredientReadOnlyModelViewSet(viewsets.ReadOnlyModelViewSet):
 #         recipe_id = recipe.id
 #         url = reverse('recipe-detail', kwargs={'pk': recipe_id})
 #         return redirect(url)
+class ShortLinkView(View):
+    """Получение рецепта по короткой ссылке."""
 
-def short_link_view(request, id):
-    """Перенаправление на рецепт по короткой ссылке."""
-    recipe = get_object_or_404(Recipe, pk=id)
-    return redirect('recipe-detail', pk=recipe.pk)
+    def get(self, request, short_link):
+        """Возвращает страницу рецепт по короткой ссылке."""
+        recipe = get_object_or_404(Recipe, short_link=short_link)
+        recipe_id = recipe.id
+        return redirect(f'/recipes/{recipe_id}')
