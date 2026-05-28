@@ -304,7 +304,6 @@ git clone https://github.com/Andrey-Dubov-25/foodgram
 ```
 cd foodgram
 ```
-```
 
 Cоздать и активировать виртуальное окружение:
 
